@@ -1,3 +1,10 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+import { ApiCheck } from './features/api-check/api-check'
+
+export const routes: Routes = [
+  {
+    path: '',
+    component: ApiCheck,
+  },
+];

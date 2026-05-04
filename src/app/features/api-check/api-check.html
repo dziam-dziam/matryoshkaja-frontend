@@ -1,0 +1,93 @@
+<h1>Test endpointow Matryoshkaja</h1>
+
+<section>
+  <h2>Status JWT</h2>
+
+  @if (token()) {
+    <p>Token zapisany.</p>
+    <button type="button" (click)="logout()">Wyloguj</button>
+  } @else {
+    <p>Brak tokena.</p>
+  }
+</section>
+
+<section>
+  <h2>Auth</h2>
+
+  <label>
+    Email
+    <input type="email" [(ngModel)]="loginData.email" />
+  </label>
+
+  <label>
+    Haslo
+    <input type="password" [(ngModel)]="loginData.password" />
+  </label>
+
+  <button type="button" (click)="login()">POST /auth/login</button>
+</section>
+
+<section>
+  <h2>Photos</h2>
+
+  <button type="button" (click)="getPhotos()">GET /photos</button>
+
+  <label>
+    Photo ID
+    <input type="number" [(ngModel)]="photoId" />
+  </label>
+
+  <button type="button" (click)="getPhotoById()">GET /photos/{{ photoId }}</button>
+
+  <label>
+    Upload photo
+    <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+  </label>
+
+  <button type="button" (click)="uploadPhoto()">POST /photos</button>
+
+  <label>
+    Delete Photo ID
+    <input type="number" [(ngModel)]="deletePhotoId" />
+  </label>
+
+  <button type="button" (click)="deletePhoto()">DELETE /photos/{{ deletePhotoId }}</button>
+</section>
+
+<section>
+  <h2>Admins</h2>
+
+  <button type="button" (click)="getAdmins()">GET /admins/get_all</button>
+
+  <label>
+    Admin ID
+    <input type="number" [(ngModel)]="adminId" />
+  </label>
+
+  <button type="button" (click)="getAdminById()">GET /admins/get/{{ adminId }}</button>
+
+  <label>
+    New admin email
+    <input type="email" [(ngModel)]="newAdmin.email" />
+  </label>
+
+  <label>
+    New admin password
+    <input type="password" [(ngModel)]="newAdmin.password" />
+  </label>
+
+  <button type="button" (click)="createAdmin()">POST /admins/create</button>
+</section>
+
+<section>
+  <h2>Response</h2>
+
+  @if (result()) {
+    <pre>{{ result() | json }}</pre>
+  }
+
+  @if (error()) {
+    <h3>Error</h3>
+    <pre>{{ error() | json }}</pre>
+  }
+</section>

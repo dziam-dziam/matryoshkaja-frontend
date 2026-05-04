@@ -1,0 +1,35 @@
+:host {
+    display: block;
+    padding: 24px;
+    font-family: Arial, sans-serif;
+  }
+  
+  section {
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    padding: 16px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 12px;
+  }
+  
+  input {
+    display: block;
+    margin-top: 4px;
+    padding: 6px;
+  }
+  
+  button {
+    display: block;
+    margin: 8px 0;
+    padding: 8px 12px;
+  }
+  
+  pre {
+    background: #111;
+    color: #fff;
+    padding: 16px;
+    overflow: auto;
+  }  
