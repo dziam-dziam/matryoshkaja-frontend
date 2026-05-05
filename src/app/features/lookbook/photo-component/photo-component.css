@@ -1,19 +1,30 @@
 .photo-card {
-    display: grid;
-    gap: 8px;
-  }
-  
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+img {
+  background: #171717;
+  display: block;
+  height: 444.3px;
+  object-fit: cover;
+  width: min(100%, 452.4px);
+}
+
+.photo-meta {
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.2;
+  margin: 0;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
   img {
-    aspect-ratio: 3 / 4;
-    background: #eee;
-    border-radius: 4px;
-    display: block;
-    object-fit: cover;
+    height: auto;
+    max-height: 444.3px;
     width: 100%;
   }
-  
-  .photo-meta {
-    color: #5d5751;
-    font-size: 13px;
-  }
-  
+}

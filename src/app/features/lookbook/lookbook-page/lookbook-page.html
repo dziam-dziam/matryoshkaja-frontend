@@ -1,9 +1,14 @@
 <app-header-component />
 
 <main class="lookbook-body">
-  <section class="intro">
-    <p class="eyebrow">Lookbook</p>
-    <h1>Matryoshkaja archive</h1>
+  <section class="lookbook-text" aria-label="Lookbook introduction">
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed rhoncus ligula sit amet est
+      egestas condimentum. Donec volutpat a massa tincidunt consectetur. Nullam finibus nibh in
+      metus imperdiet, nec molestie augue sagittis. Fusce eleifend arcu at erat faucibus sagittis.
+      Ut maximus libero nec urna sollicitudin posuere. Sed ligula felis, semper sed orci ac, porta
+      venenatis ex.
+    </p>
   </section>
 
   <app-photo-list-component [photos]="photos()" [loading]="loading()" [error]="error()" />

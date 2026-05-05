@@ -1,62 +1,61 @@
 .about-body {
-    display: grid;
-    gap: 48px;
-    padding: 48px 32px 64px;
+  background: var(--color-body);
+  display: grid;
+  gap: 28px;
+  justify-items: center;
+  padding: 24px 32px 64px;
+}
+
+.about-text {
+  color: var(--color-text);
+  font-family: var(--font-display);
+  max-width: 780px;
+  text-align: center;
+}
+
+.about-text h1,
+.about-text h2 {
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 24.8px;
+  line-height: 1.2;
+  margin: 0 0 24px;
+}
+
+.about-text p {
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 15.1px;
+  line-height: 1.32;
+  margin: 0;
+}
+
+.about-image {
+  display: block;
+  height: 504.3px;
+  object-fit: cover;
+  width: min(100%, 396.3px);
+}
+
+@media (max-width: 640px) {
+  .about-body {
+    gap: 24px;
+    padding: 24px 18px 48px;
   }
-  
-  .about-hero {
-    border-bottom: 1px solid #ded8d1;
-    display: grid;
-    gap: 16px;
-    padding-bottom: 40px;
+
+  .about-text h1,
+  .about-text h2 {
+    font-size: 23px;
+    margin-bottom: 18px;
   }
-  
-  .eyebrow {
-    color: #f1f1f1;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    margin: 0;
-    text-transform: uppercase;
+
+  .about-text p {
+    font-size: 14.5px;
   }
-  
-  h1 {
-    color: #f1f1f1;
-    font-size: 48px;
-    line-height: 1.05;
-    margin: 0;
-    max-width: 860px;
+
+  .about-image {
+    height: auto;
+    max-height: 504.3px;
+    width: 100%;
   }
-  
-  .about-hero p:last-child {
-    color: #f1f1f1;
-    font-size: 18px;
-    line-height: 1.6;
-    margin: 0;
-    max-width: 680px;
-  }
-  
-  .about-content {
-    display: grid;
-    gap: 44px;
-  }
-  
-  @media (max-width: 640px) {
-    .about-body {
-      gap: 36px;
-      padding: 32px 20px 48px;
-    }
-  
-    .about-hero {
-      padding-bottom: 32px;
-    }
-  
-    h1 {
-      font-size: 36px;
-    }
-  
-    .about-hero p:last-child {
-      font-size: 16px;
-    }
-  }
-  
+}
