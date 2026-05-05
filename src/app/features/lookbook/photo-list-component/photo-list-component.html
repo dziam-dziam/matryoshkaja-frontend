@@ -1,1 +1,13 @@
-<p>photo-list-component works!</p>
+@if (loading()) {
+  <p class="state">Loading photos...</p>
+} @else if (error()) {
+  <p class="state error">Could not load photos.</p>
+} @else if (photos().length === 0) {
+  <p class="state">No photos yet.</p>
+} @else {
+  <section class="photo-grid" aria-label="Lookbook photos">
+    @for (photo of photos(); track photo.id) {
+      <app-photo-component [photo]="photo" />
+    }
+  </section>
+}

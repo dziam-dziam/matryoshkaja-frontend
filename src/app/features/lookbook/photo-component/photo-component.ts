@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
+
+import { PhotoResponse } from '../../../core/api/api.models';
 
 @Component({
   selector: 'app-photo-component',
@@ -6,4 +8,6 @@ import { Component } from '@angular/core';
   templateUrl: './photo-component.html',
   styleUrl: './photo-component.css',
 })
-export class PhotoComponent {}
+export class PhotoComponent {
+  readonly photo = input.required<PhotoResponse>();
+}

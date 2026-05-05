@@ -1,0 +1,19 @@
+.photo-card {
+    display: grid;
+    gap: 8px;
+  }
+  
+  img {
+    aspect-ratio: 3 / 4;
+    background: #eee;
+    border-radius: 4px;
+    display: block;
+    object-fit: cover;
+    width: 100%;
+  }
+  
+  .photo-meta {
+    color: #5d5751;
+    font-size: 13px;
+  }
+  

@@ -1,1 +1,12 @@
-<p>lookbook-page works!</p>
+<app-header-component />
+
+<main class="lookbook-body">
+  <section class="intro">
+    <p class="eyebrow">Lookbook</p>
+    <h1>Matryoshkaja archive</h1>
+  </section>
+
+  <app-photo-list-component [photos]="photos()" [loading]="loading()" [error]="error()" />
+</main>
+
+<app-footer-component />
