@@ -1,36 +1,106 @@
 .site-header {
-    align-items: center;
-    border-bottom: 1px solid #ded8d1;
-    display: flex;
-    justify-content: space-between;
-    padding: 20px 32px;
+  background: var(--color-header);
+  color: var(--color-text);
+  display: grid;
+  min-height: 350px;
+  padding: 1px 15px 12px;
+  position: relative;
+}
+
+.nav-row {
+  align-items: center;
+  display: flex;
+  gap: 22px;
+  position: relative;
+  z-index: 2;
+}
+
+.brand-frame {
+  border: 3px solid var(--color-text);
+  color: var(--color-text);
+  font-family: var(--font-brand);
+  font-size: 25.8px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 8px 13px;
+  text-decoration: none;
+}
+
+nav a {
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.hero-row {
+  align-self: end;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.artist-block {
+  padding-left: 6px;
+}
+
+.artist-name {
+  font-family: var(--font-display);
+  font-size: 42.4px;
+  font-weight: 400;
+  line-height: 1;
+  margin: 0 0 22px;
+}
+
+.artist-location {
+  font-family: var(--font-brand);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 86px;
+  font-weight: 400;
+  left: 50%;
+  line-height: 1;
+  margin: 0;
+  position: absolute;
+  text-align: center;
+  top: 45%;
+  transform: translate(-50%, -180%);
+  white-space: nowrap;
+}
+
+
+@media (max-width: 900px) {
+  .section-title {
+    font-size: 64px;
   }
-  
-  .brand {
-    color: #1f1f1f;
-    font-size: 22px;
-    font-weight: 800;
-    text-decoration: none;
+}
+
+@media (max-width: 700px) {
+  .site-header {
+    min-height: 300px;
   }
-  
-  nav {
-    display: flex;
-    gap: 18px;
+
+  .brand-frame {
+    font-size: 21px;
   }
-  
-  nav a {
-    color: #4c4641;
-    font-size: 14px;
-    font-weight: 700;
-    text-decoration: none;
+
+  .nav-row {
+    gap: 16px;
   }
-  
-  @media (max-width: 640px) {
-    .site-header {
-      align-items: flex-start;
-      display: grid;
-      gap: 12px;
-      padding: 18px 20px;
-    }
+
+  .artist-name {
+    font-size: 36px;
   }
-  
+
+  .section-title {
+    font-size: 48px;
+    top: 48%;
+  }
+}

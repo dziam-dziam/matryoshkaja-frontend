@@ -1,1 +1,24 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=GFS+Didot&family=Open+Sans:wght@400;600;700&display=swap');
+
+:root {
+  --color-header: #171717;
+  --color-body: #283231;
+  --color-text: #f1f1f1;
+  --color-muted: #c6bebe;
+
+  --font-display: 'GFS Didot', 'Bodoni 72', 'Bodoni MT', serif;
+  --font-brand: 'Bodoni 72 Smallcaps', 'Bodoni MT Condensed', 'GFS Didot', serif;
+  --font-sans: 'Open Sans', Arial, sans-serif;
+  --font-footer: 'Helvetica World', Helvetica, Arial, sans-serif;
+}
+
+html,
+body {
+  background: var(--color-body);
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  color: var(--color-text);
+}

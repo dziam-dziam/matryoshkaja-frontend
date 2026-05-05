@@ -1,1 +1,34 @@
-<p>about-page works!</p>
+<app-header-component sectionTitle="About Me" />
+
+<main class="about-body">
+  <section class="about-hero">
+    <p class="eyebrow">About</p>
+    <h1>Matryoshkaja is a layered visual archive.</h1>
+    <p>
+      A place for collecting images, shaping context, and presenting the project with a quiet,
+      editorial rhythm.
+    </p>
+  </section>
+
+  <div class="about-content">
+    <app-text-block-component
+      eyebrow="Project"
+      title="What Matryoshkaja is"
+      [paragraphs]="storyParagraphs"
+    />
+
+    <app-text-block-component
+      eyebrow="Lookbook"
+      title="How the archive works"
+      [paragraphs]="lookbookParagraphs"
+    />
+
+    <app-text-block-component
+      eyebrow="Process"
+      title="How the frontend is being built"
+      [paragraphs]="processParagraphs"
+    />
+  </div>
+</main>
+
+<app-footer-component />

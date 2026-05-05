@@ -1,0 +1,101 @@
+<app-header-component />
+
+<main class="admin-body">
+  <section class="admin-hero">
+    <p class="section-label">Admin</p>
+    <h1>Matryoshkaja admin panel</h1>
+    <p>Manage lookbook photos and verify the content served from the backend.</p>
+  </section>
+
+  @if (!isLoggedIn()) {
+    <section class="panel">
+      <h2>Login</h2>
+
+      <label>
+        Email
+        <input type="email" [(ngModel)]="loginData.email" autocomplete="username" />
+      </label>
+
+      <label>
+        Password
+        <input type="password" [(ngModel)]="loginData.password" autocomplete="current-password" />
+      </label>
+
+      <button type="button" (click)="login()">Log in</button>
+    </section>
+  } @else {
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Session</h2>
+          <p>JWT token is active.</p>
+        </div>
+
+        <button type="button" class="secondary" (click)="logout()">Log out</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Upload photo</h2>
+
+      <label>
+        Image file
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+      </label>
+
+      <button type="button" (click)="uploadPhoto()">Upload</button>
+    </section>
+  }
+
+  @if (message()) {
+    <p class="message">{{ message() }}</p>
+  }
+
+  @if (error()) {
+    <section class="error-box">
+      <h2>Error</h2>
+      <pre>{{ error() | json }}</pre>
+    </section>
+  }
+
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Photos</h2>
+        <p>Current photos returned by GET /photos.</p>
+      </div>
+
+      <button type="button" class="secondary" (click)="loadPhotos()">Refresh</button>
+    </div>
+
+    @if (loading()) {
+      <p>Loading photos...</p>
+    } @else if (photos().length === 0) {
+      <p>No photos yet.</p>
+    } @else {
+      <div class="photo-admin-list">
+        @for (photo of photos(); track photo.id) {
+          <article class="photo-row">
+            <img [src]="photo.imageUrl" [alt]="'Matryoshkaja photo ' + photo.id" />
+
+            <div>
+              <strong>Photo #{{ photo.id }}</strong>
+              <a [href]="photo.imageUrl" target="_blank" rel="noopener">Open image</a>
+            </div>
+
+            <button
+              type="button"
+              class="danger"
+              (click)="deletePhoto(photo.id)"
+              [disabled]="!isLoggedIn()"
+            >
+              Delete
+            </button>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</main>
+
+<app-footer-component />

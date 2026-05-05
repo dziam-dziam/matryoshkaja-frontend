@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-text-block-component',
@@ -6,4 +6,8 @@ import { Component } from '@angular/core';
   templateUrl: './text-block-component.html',
   styleUrl: './text-block-component.css',
 })
-export class TextBlockComponent {}
+export class TextBlockComponent {
+  readonly eyebrow = input('');
+  readonly title = input('');
+  readonly paragraphs = input<string[]>([]);
+}
