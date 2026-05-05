@@ -1,4 +1,5 @@
 .site-header {
+  animation: headerDriftIn 700ms ease-out both;
   background: var(--color-header);
   color: var(--color-text);
   display: grid;
@@ -24,6 +25,19 @@
   line-height: 1;
   padding: 8px 13px;
   text-decoration: none;
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease,
+    transform 220ms ease;
+}
+
+.brand-frame:hover,
+.brand-frame:focus-visible {
+  background: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--color-header);
+  transform: translateY(-1px);
 }
 
 nav a {
@@ -31,7 +45,32 @@ nav a {
   font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 700;
+  position: relative;
   text-decoration: none;
+  transition: color 220ms ease;
+}
+
+nav a::after {
+  background: var(--color-muted);
+  bottom: -5px;
+  content: '';
+  height: 1px;
+  left: 0;
+  position: absolute;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 240ms ease;
+  width: 100%;
+}
+
+nav a:hover,
+nav a:focus-visible {
+  color: var(--color-muted);
+}
+
+nav a:hover::after,
+nav a:focus-visible::after {
+  transform: scaleX(1);
 }
 
 .hero-row {
@@ -46,6 +85,7 @@ nav a {
 }
 
 .artist-name {
+  animation: softReveal 760ms 120ms ease-out both;
   font-family: var(--font-display);
   font-size: 42.4px;
   font-weight: 400;
@@ -54,6 +94,7 @@ nav a {
 }
 
 .artist-location {
+  animation: softReveal 760ms 220ms ease-out both;
   font-family: var(--font-brand);
   font-size: 19px;
   font-weight: 700;
@@ -62,6 +103,7 @@ nav a {
 }
 
 .section-title {
+  animation: sectionTitleReveal 760ms 180ms ease-out both;
   font-family: var(--font-display);
   font-size: 86px;
   font-weight: 400;
@@ -74,7 +116,6 @@ nav a {
   transform: translate(-50%, -180%);
   white-space: nowrap;
 }
-
 
 @media (max-width: 900px) {
   .section-title {

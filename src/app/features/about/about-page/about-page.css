@@ -1,4 +1,5 @@
 .about-body {
+  animation: pageFadeIn 700ms 120ms ease-out both;
   background: var(--color-body);
   display: grid;
   gap: 28px;
@@ -7,10 +8,19 @@
 }
 
 .about-text {
+  animation: softReveal 700ms ease-out both;
   color: var(--color-text);
   font-family: var(--font-display);
   max-width: 780px;
   text-align: center;
+}
+
+.about-text:nth-of-type(2) {
+  animation-delay: 140ms;
+}
+
+.about-text:nth-of-type(3) {
+  animation-delay: 260ms;
 }
 
 .about-text h1,
@@ -31,10 +41,27 @@
 }
 
 .about-image {
+  animation: softReveal 760ms 90ms ease-out both;
+  box-shadow: 0 14px 26px rgb(0 0 0 / 18%);
   display: block;
   height: 504.3px;
   object-fit: cover;
+  transition:
+    box-shadow 280ms ease,
+    filter 280ms ease,
+    transform 280ms ease;
   width: min(100%, 396.3px);
+}
+
+.about-image:nth-of-type(2) {
+  animation-delay: 210ms;
+}
+
+.about-image:hover,
+.about-image:focus-visible {
+  box-shadow: 0 22px 42px rgb(0 0 0 / 30%);
+  filter: contrast(1.05) brightness(1.04);
+  transform: scale(1.025);
 }
 
 @media (max-width: 640px) {

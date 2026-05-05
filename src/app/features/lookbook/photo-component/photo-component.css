@@ -9,6 +9,10 @@ img {
   display: block;
   height: 444.3px;
   object-fit: cover;
+  transition:
+    box-shadow 260ms ease,
+    filter 260ms ease,
+    transform 260ms ease;
   width: min(100%, 452.4px);
 }
 
@@ -19,6 +23,22 @@ img {
   line-height: 1.2;
   margin: 0;
   text-align: center;
+  transition:
+    color 220ms ease,
+    transform 220ms ease;
+}
+
+.photo-card:hover img,
+.photo-card:focus-within img {
+  box-shadow: 0 18px 34px rgb(0 0 0 / 28%);
+  filter: contrast(1.04) brightness(1.04);
+  transform: scale(1.025);
+}
+
+.photo-card:hover .photo-meta,
+.photo-card:focus-within .photo-meta {
+  color: var(--color-muted);
+  transform: translateY(-2px);
 }
 
 @media (max-width: 640px) {

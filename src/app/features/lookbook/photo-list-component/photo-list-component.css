@@ -5,6 +5,18 @@
   justify-content: center;
 }
 
+.photo-grid app-photo-component {
+  animation: softReveal 680ms ease-out both;
+}
+
+.photo-grid app-photo-component:nth-child(2n) {
+  animation-delay: 120ms;
+}
+
+.photo-grid app-photo-component:nth-child(3n) {
+  animation-delay: 220ms;
+}
+
 .state {
   color: var(--color-text);
   font-family: var(--font-display);
