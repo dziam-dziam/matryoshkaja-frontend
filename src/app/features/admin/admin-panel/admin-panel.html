@@ -13,7 +13,6 @@
     <p class="admin-error">Something went wrong. Please try again.</p>
   }
 
-  <!-- CMS TEXT: edytor tekstów strony widoczny tylko po zalogowaniu. -->
   @if (isLoggedIn()) {
     <section class="content-editor" aria-label="Editable page text fields">
       <div class="editor-header">
@@ -39,7 +38,17 @@
   } @else {
     <section class="admin-photo-grid" aria-label="Admin lookbook photos">
       @for (photo of photos(); track photo.id) {
-        <article class="admin-photo-card">
+        <article
+          class="admin-photo-card"
+          [class.is-draggable]="isLoggedIn()"
+          [class.is-dragging]="isDragging(photo.id)"
+          [attr.draggable]="isLoggedIn() ? 'true' : null"
+          [style.view-transition-name]="'photo-card-' + photo.id"
+          (dragstart)="onDragStart(photo.id, $event)"
+          (dragover)="onDragOver(photo.id, $event)"
+          (drop)="onDrop($event)"
+          (dragend)="onDragEnd()"
+        >
           <div class="photo-frame">
             <img [src]="photo.imageUrl" [alt]="'Matryoshkaja photo ' + photo.id" />
 
@@ -63,7 +72,7 @@
     <div class="admin-actions">
       <label class="add-button">
         <span>Add Photo</span>
-        <span class="add-arrow">→</span>
+        <span class="add-arrow">&rarr;</span>
         <input type="file" accept="image/*" (change)="onFileSelected($event)" />
       </label>
 

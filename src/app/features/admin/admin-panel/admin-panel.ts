@@ -9,7 +9,6 @@ import { PhotoService } from '../../../core/api/photo.service';
 import { FooterComponent } from '../../../shared/components/footer-component/footer-component';
 import { HeaderComponent } from '../../../shared/components/header-component/header-component';
 
-// CMS TEXT: pole widoczne w admin panelu.
 interface ContentField extends PageContentResponse {
   label: string;
 }
@@ -34,7 +33,6 @@ export class AdminPanel {
   readonly error = signal<unknown>(null);
   readonly message = signal('');
 
-  // CMS TEXT: lista tekstów, które klientka może edytować.
   readonly contentFields = signal<ContentField[]>([
     {
       key: 'lookbook.intro',
@@ -61,7 +59,7 @@ export class AdminPanel {
       key: 'about.section3.text',
       label: 'About section 3 text',
       value:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed rhoncus ligula sit amet est egestas condimentum.',
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed rhoncus ligula sit amet egestas condimentum.',
     },
   ]);
 
@@ -71,6 +69,12 @@ export class AdminPanel {
   };
 
   selectedFile: File | null = null;
+
+  // REORDER CHANGE: aktualnie przeciągane zdjęcie.
+  readonly draggedPhotoId = signal<number | null>(null);
+
+  private dragStartPhotos: PhotoResponse[] = [];
+  private dropCommitted = false;
 
   constructor() {
     this.loadPhotos();
@@ -112,7 +116,6 @@ export class AdminPanel {
     });
   }
 
-  // CMS TEXT: pobiera zapisane teksty z backendu.
   loadContent(): void {
     this.pageContentService.getAll().subscribe({
       next: (content) => {
@@ -127,7 +130,6 @@ export class AdminPanel {
     });
   }
 
-  // CMS TEXT: zapisuje teksty z panelu admina.
   saveContent(): void {
     this.clearFeedback();
 
@@ -177,6 +179,113 @@ export class AdminPanel {
       },
       error: (error) => this.error.set(error),
     });
+  }
+
+  // REORDER CHANGE: start przeciągania całej karty zdjęcia.
+  onDragStart(photoId: number, event: DragEvent): void {
+    this.draggedPhotoId.set(photoId);
+    this.dragStartPhotos = [...this.photos()];
+    this.dropCommitted = false;
+
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(photoId));
+
+      const card = event.currentTarget as HTMLElement | null;
+
+      if (card) {
+        event.dataTransfer.setDragImage(card, card.offsetWidth / 2, 40);
+      }
+    }
+  }
+
+  // REORDER CHANGE: preview kolejności jeszcze przed puszczeniem zdjęcia.
+  onDragOver(targetPhotoId: number, event: DragEvent): void {
+    event.preventDefault();
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+
+    this.previewPhotoOrder(targetPhotoId);
+  }
+
+  // REORDER CHANGE: zapisuje aktualnie widoczny preview order.
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+
+    if (this.draggedPhotoId() === null) {
+      return;
+    }
+
+    this.dropCommitted = true;
+    this.draggedPhotoId.set(null);
+    this.dragStartPhotos = [];
+    this.savePhotoOrder();
+  }
+
+  // REORDER CHANGE: jeśli admin puści poza galerią, wracamy do starej kolejności.
+  onDragEnd(): void {
+    if (!this.dropCommitted && this.dragStartPhotos.length > 0) {
+      this.setPhotosWithMotion(this.dragStartPhotos);
+    }
+
+    this.draggedPhotoId.set(null);
+    this.dragStartPhotos = [];
+    this.dropCommitted = false;
+  }
+
+  isDragging(photoId: number): boolean {
+    return this.draggedPhotoId() === photoId;
+  }
+
+  private previewPhotoOrder(targetPhotoId: number): void {
+    const draggedPhotoId = this.draggedPhotoId();
+
+    if (draggedPhotoId === null || draggedPhotoId === targetPhotoId) {
+      return;
+    }
+
+    const photos = [...this.photos()];
+    const draggedIndex = photos.findIndex((photo) => photo.id === draggedPhotoId);
+    const targetIndex = photos.findIndex((photo) => photo.id === targetPhotoId);
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      return;
+    }
+
+    const [draggedPhoto] = photos.splice(draggedIndex, 1);
+    photos.splice(targetIndex, 0, draggedPhoto);
+
+    this.setPhotosWithMotion(photos.map((photo, index) => ({ ...photo, displayOrder: index + 1 })));
+  }
+
+  private savePhotoOrder(): void {
+    this.clearFeedback();
+
+    this.photoService.updateOrder({ photoIds: this.photos().map((photo) => photo.id) }).subscribe({
+      next: (photos) => {
+        this.photos.set(photos);
+        this.message.set('Photo order saved.');
+      },
+      error: (error) => this.error.set(error),
+    });
+  }
+
+  private setPhotosWithMotion(photos: PhotoResponse[]): void {
+    const documentWithViewTransitions =
+      typeof document === 'undefined'
+        ? null
+        : (document as Document & {
+            startViewTransition?: (update: () => void) => void;
+          });
+
+    if (documentWithViewTransitions?.startViewTransition) {
+      documentWithViewTransitions.startViewTransition(() => this.photos.set(photos));
+      return;
+    }
+
+    this.photos.set(photos);
   }
 
   private clearFeedback(): void {

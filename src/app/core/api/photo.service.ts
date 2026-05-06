@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { API_BASE_URL } from './api.config';
-import { PhotoResponse } from './api.models';
+import { PhotoOrderUpdateRequest, PhotoResponse } from './api.models';
 
 @Injectable({ providedIn: 'root' })
 export class PhotoService {
@@ -27,5 +27,10 @@ export class PhotoService {
 
   delete(photoId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiBaseUrl}/photos/${photoId}`);
+  }
+
+  // REORDER CHANGE: persists the admin-selected photo order.
+  updateOrder(request: PhotoOrderUpdateRequest): Observable<PhotoResponse[]> {
+    return this.http.put<PhotoResponse[]>(`${this.apiBaseUrl}/photos/order`, request);
   }
 }

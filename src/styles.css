@@ -81,3 +81,8 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+/* REORDER CHANGE: wygładza zmianę pozycji kart w przeglądarkach wspierających View Transitions. */
+::view-transition-group(*) {
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}

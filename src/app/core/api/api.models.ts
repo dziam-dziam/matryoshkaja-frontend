@@ -16,6 +16,14 @@ export interface AdminResponse {
 export interface PhotoResponse {
   id: number;
   imageUrl: string;
+
+  // REORDER CHANGE: current saved photo position in lookbook.
+  displayOrder: number;
+}
+
+// REORDER CHANGE: ids in the exact order selected in admin panel.
+export interface PhotoOrderUpdateRequest {
+  photoIds: number[];
 }
 
 // CMS TEXT: teksty strony jako key/value.

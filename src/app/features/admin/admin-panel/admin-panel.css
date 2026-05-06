@@ -388,3 +388,39 @@
 .save-text-button:focus-visible {
   transform: translateY(-1px);
 }
+/* REORDER CHANGE: visual hint that photo cards can be moved by admin. */
+.admin-photo-card.is-draggable {
+  cursor: grab;
+}
+
+.admin-photo-card.is-draggable:active {
+  cursor: grabbing;
+  opacity: 0.72;
+}
+.admin-photo-card {
+  animation: softReveal 680ms ease-out both;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  transition:
+    filter 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+/* REORDER CHANGE: karta jest draggable po zalogowaniu. */
+.admin-photo-card.is-draggable {
+  cursor: grab;
+  user-select: none;
+}
+
+.admin-photo-card.is-draggable:active {
+  cursor: grabbing;
+}
+
+/* REORDER CHANGE: karta, którą aktualnie trzymamy. */
+.admin-photo-card.is-dragging {
+  filter: saturate(0.8) brightness(0.86);
+  opacity: 0.68;
+  transform: scale(0.98);
+}
