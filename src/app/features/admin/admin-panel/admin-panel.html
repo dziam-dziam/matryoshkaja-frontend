@@ -1,101 +1,100 @@
 <app-header-component />
 
-<main class="admin-body">
-  <section class="admin-hero">
-    <p class="section-label">Admin</p>
-    <h1>Matryoshkaja admin panel</h1>
-    <p>Manage lookbook photos and verify the content served from the backend.</p>
+<main class="admin-lookbook" [class.locked]="!isLoggedIn()">
+  <section class="admin-intro" aria-label="Admin lookbook introduction">
+    <p>Admin panel</p>
   </section>
 
-  @if (!isLoggedIn()) {
-    <section class="panel">
-      <h2>Login</h2>
+  @if (message()) {
+    <p class="admin-message">{{ message() }}</p>
+  }
+
+  @if (error()) {
+    <p class="admin-error">Something went wrong. Please try again.</p>
+  }
+
+  <!-- CMS TEXT: edytor tekstów strony widoczny tylko po zalogowaniu. -->
+  @if (isLoggedIn()) {
+    <section class="content-editor" aria-label="Editable page text fields">
+      <div class="editor-header">
+        <h2>Page text</h2>
+        <button type="button" class="save-text-button" (click)="saveContent()">Save text</button>
+      </div>
+
+      <div class="content-fields">
+        @for (field of contentFields(); track field.key) {
+          <label>
+            {{ field.label }}
+            <textarea [(ngModel)]="field.value" rows="3"></textarea>
+          </label>
+        }
+      </div>
+    </section>
+  }
+
+  @if (loading()) {
+    <p class="state">Loading photos...</p>
+  } @else if (photos().length === 0) {
+    <p class="state">No photos yet.</p>
+  } @else {
+    <section class="admin-photo-grid" aria-label="Admin lookbook photos">
+      @for (photo of photos(); track photo.id) {
+        <article class="admin-photo-card">
+          <div class="photo-frame">
+            <img [src]="photo.imageUrl" [alt]="'Matryoshkaja photo ' + photo.id" />
+
+            @if (isLoggedIn()) {
+              <button
+                type="button"
+                class="delete-button"
+                [attr.aria-label]="'Delete photo ' + photo.id"
+                (click)="deletePhoto(photo.id)"
+              ></button>
+            }
+          </div>
+
+          <p class="photo-meta">Photo #{{ photo.id }}</p>
+        </article>
+      }
+    </section>
+  }
+
+  @if (isLoggedIn()) {
+    <div class="admin-actions">
+      <label class="add-button">
+        <span>Add Photo</span>
+        <span class="add-arrow">→</span>
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+      </label>
+
+      <button type="button" class="logout-button" (click)="logout()">Wyloguj</button>
+    </div>
+  }
+</main>
+
+@if (!isLoggedIn()) {
+  <section class="login-overlay" aria-label="Admin login">
+    <form class="login-modal" (ngSubmit)="login()">
+      <h1>Admin login</h1>
 
       <label>
         Email
-        <input type="email" [(ngModel)]="loginData.email" autocomplete="username" />
+        <input type="email" [(ngModel)]="loginData.email" name="email" autocomplete="username" />
       </label>
 
       <label>
         Password
-        <input type="password" [(ngModel)]="loginData.password" autocomplete="current-password" />
+        <input
+          type="password"
+          [(ngModel)]="loginData.password"
+          name="password"
+          autocomplete="current-password"
+        />
       </label>
 
-      <button type="button" (click)="login()">Log in</button>
-    </section>
-  } @else {
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>Session</h2>
-          <p>JWT token is active.</p>
-        </div>
-
-        <button type="button" class="secondary" (click)="logout()">Log out</button>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Upload photo</h2>
-
-      <label>
-        Image file
-        <input type="file" accept="image/*" (change)="onFileSelected($event)" />
-      </label>
-
-      <button type="button" (click)="uploadPhoto()">Upload</button>
-    </section>
-  }
-
-  @if (message()) {
-    <p class="message">{{ message() }}</p>
-  }
-
-  @if (error()) {
-    <section class="error-box">
-      <h2>Error</h2>
-      <pre>{{ error() | json }}</pre>
-    </section>
-  }
-
-  <section class="panel">
-    <div class="panel-header">
-      <div>
-        <h2>Photos</h2>
-        <p>Current photos returned by GET /photos.</p>
-      </div>
-
-      <button type="button" class="secondary" (click)="loadPhotos()">Refresh</button>
-    </div>
-
-    @if (loading()) {
-      <p>Loading photos...</p>
-    } @else if (photos().length === 0) {
-      <p>No photos yet.</p>
-    } @else {
-      <div class="photo-admin-list">
-        @for (photo of photos(); track photo.id) {
-          <article class="photo-row">
-            <img [src]="photo.imageUrl" [alt]="'Matryoshkaja photo ' + photo.id" />
-
-            <div>
-              <strong>Photo #{{ photo.id }}</strong>
-              <a [href]="photo.imageUrl" target="_blank" rel="noopener">Open image</a>
-            </div>
-
-            <button
-              type="button"
-              class="danger"
-              (click)="deletePhoto(photo.id)"
-              [disabled]="!isLoggedIn()"
-            >
-              Delete
-            </button>
-          </article>
-        }
-      </div>
-    }
+      <button type="submit">Log in</button>
+    </form>
   </section>
-</main>
+}
 
 <app-footer-component />
