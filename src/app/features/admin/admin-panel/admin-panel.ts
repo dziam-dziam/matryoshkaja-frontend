@@ -42,7 +42,13 @@ export class AdminPanel {
   readonly uploadingPhoto = signal(false);
   readonly savingCaptionPhotoId = signal<number | null>(null);
   readonly captionSaveSuccess = signal<CaptionSaveSuccess | null>(null);
+  readonly trashHover = signal(false);
+  readonly deletingPhotoId = signal<number | null>(null);
+  readonly deleteSuccess = signal(false);
+  readonly contentSaveSuccess = signal(false);
   private captionSuccessTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private deleteSuccessTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private contentSuccessTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   // CMS TEXT: lista tekstow, ktore klientka moze edytowac.
   readonly contentFields = signal<ContentField[]>([
@@ -81,8 +87,11 @@ export class AdminPanel {
   };
 
   selectedFile: File | null = null;
+
+  // CAPTION CHANGE: caption used when uploading a new photo.
   newPhotoCaption = '';
 
+  // REORDER CHANGE: remembers which photo is currently being dragged.
   readonly draggedPhotoId = signal<number | null>(null);
   private dragStartPhotos: PhotoResponse[] = [];
   private dropCommitted = false;
@@ -127,6 +136,7 @@ export class AdminPanel {
     });
   }
 
+  // CMS TEXT: pobiera zapisane teksty z backendu.
   loadContent(): void {
     this.pageContentService.getAll().subscribe({
       next: (content) => {
@@ -141,13 +151,17 @@ export class AdminPanel {
     });
   }
 
+  // CMS TEXT: zapisuje teksty z panelu admina.
   saveContent(): void {
     this.clearFeedback();
 
     this.pageContentService
       .updateAll(this.contentFields().map(({ key, value }) => ({ key, value })))
       .subscribe({
-        next: () => this.message.set('Text fields saved.'),
+        next: () => {
+          this.message.set('Text fields saved.');
+          this.showContentSuccess();
+        },
         error: (error) => this.error.set(error),
       });
   }
@@ -178,6 +192,7 @@ export class AdminPanel {
       .subscribe({
         next: () => {
           this.selectedFile = null;
+          // CAPTION CHANGE: clear upload caption after successful upload.
           this.newPhotoCaption = '';
           this.message.set('Photo uploaded successfully.');
           this.loadPhotos();
@@ -186,6 +201,7 @@ export class AdminPanel {
       });
   }
 
+  // CAPTION CHANGE: saves an edited caption for an existing photo.
   updateCaption(photo: PhotoResponse): void {
     if (this.savingCaptionPhotoId() === photo.id) {
       return;
@@ -222,10 +238,12 @@ export class AdminPanel {
     });
   }
 
+  // REORDER CHANGE: starts native drag/drop for a photo card.
   onDragStart(photoId: number, event: DragEvent): void {
     this.draggedPhotoId.set(photoId);
     this.dragStartPhotos = [...this.photos()];
     this.dropCommitted = false;
+    this.trashHover.set(false);
 
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
@@ -239,6 +257,7 @@ export class AdminPanel {
     }
   }
 
+  // REORDER CHANGE: previews the new order before the admin drops the photo.
   onDragOver(targetPhotoId: number, event: DragEvent): void {
     event.preventDefault();
 
@@ -249,6 +268,7 @@ export class AdminPanel {
     this.previewPhotoOrder(targetPhotoId);
   }
 
+  // REORDER CHANGE: saves the currently previewed order.
   onDrop(event: DragEvent): void {
     event.preventDefault();
 
@@ -262,6 +282,35 @@ export class AdminPanel {
     this.savePhotoOrder();
   }
 
+  onTrashDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.trashHover.set(true);
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+  }
+
+  onTrashDragLeave(): void {
+    this.trashHover.set(false);
+  }
+
+  onTrashDrop(event: DragEvent): void {
+    event.preventDefault();
+
+    const photoId = this.draggedPhotoId();
+
+    if (photoId === null) {
+      return;
+    }
+
+    this.dropCommitted = true;
+    this.draggedPhotoId.set(null);
+    this.trashHover.set(false);
+    this.deletePhotoFromTrash(photoId);
+  }
+
+  // REORDER CHANGE: restores old order when the admin cancels by dropping outside the grid.
   onDragEnd(): void {
     if (!this.dropCommitted && this.dragStartPhotos.length > 0) {
       this.setPhotosWithMotion(this.dragStartPhotos);
@@ -270,6 +319,7 @@ export class AdminPanel {
     this.draggedPhotoId.set(null);
     this.dragStartPhotos = [];
     this.dropCommitted = false;
+    this.trashHover.set(false);
   }
 
   isDragging(photoId: number): boolean {
@@ -297,6 +347,7 @@ export class AdminPanel {
     this.setPhotosWithMotion(photos.map((photo, index) => ({ ...photo, displayOrder: index + 1 })));
   }
 
+  // REORDER CHANGE: sends the new id order to backend.
   private savePhotoOrder(): void {
     this.clearFeedback();
 
@@ -309,13 +360,38 @@ export class AdminPanel {
     });
   }
 
+  private deletePhotoFromTrash(photoId: number): void {
+    this.clearFeedback();
+    this.deletingPhotoId.set(photoId);
+
+    this.photoService
+      .delete(photoId)
+      .pipe(finalize(() => this.deletingPhotoId.set(null)))
+      .subscribe({
+        next: () => {
+          this.photos.update((photos) => photos.filter((photo) => photo.id !== photoId));
+          this.dragStartPhotos = [];
+          this.message.set(`Photo #${photoId} deleted.`);
+          this.showDeleteSuccess();
+        },
+        error: (error) => {
+          this.error.set(error);
+
+          if (this.dragStartPhotos.length > 0) {
+            this.setPhotosWithMotion(this.dragStartPhotos);
+          }
+
+          this.dragStartPhotos = [];
+        },
+      });
+  }
+
   private setPhotosWithMotion(photos: PhotoResponse[]): void {
-    const documentWithViewTransitions =
-      typeof document === 'undefined'
-        ? null
-        : (document as Document & {
-            startViewTransition?: (update: () => void) => void;
-          });
+    const documentWithViewTransitions = typeof document === 'undefined'
+      ? null
+      : (document as Document & {
+          startViewTransition?: (update: () => void) => void;
+        });
 
     if (documentWithViewTransitions?.startViewTransition) {
       documentWithViewTransitions.startViewTransition(() => this.photos.set(photos));
@@ -338,6 +414,32 @@ export class AdminPanel {
     this.captionSuccessTimeoutId = setTimeout(() => {
       this.captionSaveSuccess.set(null);
       this.captionSuccessTimeoutId = null;
+    }, 800);
+  }
+
+  private showDeleteSuccess(): void {
+    if (this.deleteSuccessTimeoutId) {
+      clearTimeout(this.deleteSuccessTimeoutId);
+    }
+
+    this.deleteSuccess.set(true);
+
+    this.deleteSuccessTimeoutId = setTimeout(() => {
+      this.deleteSuccess.set(false);
+      this.deleteSuccessTimeoutId = null;
+    }, 1800);
+  }
+
+  private showContentSuccess(): void {
+    if (this.contentSuccessTimeoutId) {
+      clearTimeout(this.contentSuccessTimeoutId);
+    }
+
+    this.contentSaveSuccess.set(true);
+
+    this.contentSuccessTimeoutId = setTimeout(() => {
+      this.contentSaveSuccess.set(false);
+      this.contentSuccessTimeoutId = null;
     }, 800);
   }
 

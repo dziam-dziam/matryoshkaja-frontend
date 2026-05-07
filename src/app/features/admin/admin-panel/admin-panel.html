@@ -7,6 +7,7 @@
     <p class="admin-error" aria-live="assertive">Something went wrong. Please try again.</p>
   }
 
+  <!-- CMS TEXT: edytor tekstow strony widoczny tylko po zalogowaniu. -->
   @if (isLoggedIn()) {
     <section class="content-editor" aria-label="Editable page text fields">
       <div class="editor-header">
@@ -16,7 +17,7 @@
 
       <div class="content-fields">
         @for (field of contentFields(); track field.key) {
-          <label>
+          <label [class.is-content-success]="contentSaveSuccess()">
             {{ field.label }}
             <textarea [(ngModel)]="field.value" rows="3"></textarea>
           </label>
@@ -46,18 +47,10 @@
         >
           <div class="photo-frame">
             <img [src]="photo.imageUrl" [alt]="'Matryoshkaja photo ' + photo.id" />
-
-            @if (isLoggedIn()) {
-              <button
-                type="button"
-                class="delete-button"
-                [attr.aria-label]="'Delete photo ' + photo.id"
-                (click)="deletePhoto(photo.id)"
-              ></button>
-            }
           </div>
 
           @if (isLoggedIn()) {
+            <!-- CAPTION CHANGE: admin can edit a caption after the photo exists. -->
             <label class="caption-editor">
               <span>Photo caption</span>
               <input
@@ -85,6 +78,7 @@
               }
             </button>
           } @else {
+            <!-- CAPTION CHANGE: fallback for photos without a custom caption. -->
             <p class="photo-meta">{{ photo.caption || 'Photo #' + photo.id }}</p>
           }
         </article>
@@ -94,6 +88,7 @@
 
   @if (isLoggedIn()) {
     <div class="admin-actions">
+      <!-- CAPTION CHANGE: caption is filled before selecting the new photo file. -->
       <div class="upload-panel">
         <label class="new-caption-field">
           <span>New photo caption</span>
@@ -123,10 +118,37 @@
         </label>
       </div>
 
-      <button type="button" class="logout-button" (click)="logout()">Wyloguj</button>
+      <button type="button" class="logout-button" (click)="logout()">Log Out</button>
     </div>
   }
 </main>
+
+@if (isLoggedIn() && draggedPhotoId() !== null) {
+  <div
+    class="trash-drop-zone"
+    [class.is-hovered]="trashHover()"
+    [class.is-deleting]="deletingPhotoId() !== null"
+    aria-label="Drop photo here to delete"
+    (dragover)="onTrashDragOver($event)"
+    (dragleave)="onTrashDragLeave()"
+    (drop)="onTrashDrop($event)"
+  >
+    <div class="trash-aura" aria-hidden="true"></div>
+    <div class="trash-icon" aria-hidden="true">
+      <span class="trash-lid"></span>
+      <span class="trash-handle"></span>
+      <span class="trash-bin">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </div>
+  </div>
+}
+
+@if (deleteSuccess()) {
+  <div class="delete-success-toast" aria-live="polite">Photo was deleted</div>
+}
 
 @if (!isLoggedIn()) {
   <section class="login-overlay" aria-label="Admin login">

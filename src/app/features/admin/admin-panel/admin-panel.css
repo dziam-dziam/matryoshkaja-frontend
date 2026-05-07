@@ -26,10 +26,6 @@
   gap: 8px;
   justify-items: center;
   position: relative;
-  transition:
-    filter 180ms ease,
-    opacity 180ms ease,
-    transform 180ms ease;
 }
 
 .photo-frame {
@@ -41,18 +37,7 @@
   display: block;
   height: 444.3px;
   object-fit: cover;
-  transition:
-    box-shadow 260ms ease,
-    filter 260ms ease,
-    transform 260ms ease;
   width: min(100%, 452.4px);
-}
-
-.admin-photo-card:hover img,
-.admin-photo-card:focus-within img {
-  box-shadow: 0 18px 34px rgb(0 0 0 / 28%);
-  filter: contrast(1.04) brightness(1.04);
-  transform: scale(1.025);
 }
 
 .photo-meta {
@@ -63,53 +48,12 @@
   text-align: center;
 }
 
-.delete-button {
-  align-items: center;
-  background: #c73a3a;
-  border: 1px solid #111;
-  border-radius: 999px;
-  color: var(--color-text);
-  cursor: pointer;
-  display: flex;
-  font-family: var(--font-sans);
-  font-size: 0;
-  font-weight: 700;
-  height: 38px;
-  justify-content: center;
-  line-height: 1;
-  position: absolute;
-  right: -16px;
-  top: -16px;
-  transition:
-    background-color 220ms ease,
-    border-color 220ms ease,
-    box-shadow 220ms ease,
-    transform 220ms ease;
-  width: 38px;
-  z-index: 2;
-}
-
-.delete-button::before {
-  background: var(--color-text);
-  content: '';
-  display: block;
-  height: 5px;
-  width: 18px;
-}
-
-.delete-button:hover,
-.delete-button:focus-visible {
-  background: #d84a4a;
-  border-color: var(--color-text);
-  box-shadow: 0 8px 18px rgb(0 0 0 / 24%);
-  transform: scale(1.05);
-}
-
 .admin-actions {
   display: grid;
   gap: 14px;
   justify-self: center;
 }
+
 
 
 .add-button,
@@ -184,7 +128,6 @@
 }
 
 .state,
-.admin-message,
 .admin-error {
   color: var(--color-text);
   font-family: var(--font-display);
@@ -209,10 +152,8 @@
 }
 
 .login-modal {
-  animation: softReveal 420ms ease-out both;
   background: var(--color-header);
   border: 1px solid var(--color-muted);
-  box-shadow: 0 26px 64px rgb(0 0 0 / 42%);
   color: var(--color-text);
   display: grid;
   gap: 16px;
@@ -278,12 +219,7 @@
     width: 100%;
   }
 
-  .delete-button {
-    right: -10px;
-    top: -10px;
-  }
 }
-
 .content-editor {
   border: 1px solid rgb(241 241 241 / 26%);
   color: var(--color-text);
@@ -334,10 +270,17 @@
   resize: vertical;
 }
 
+.content-fields label.is-content-success {
+  transform: translateY(-4px);
+}
+
+.content-fields label.is-content-success textarea {
+  box-shadow: 0 0 0 3px rgb(117 221 136 / 38%);
+}
+
 .save-text-button {
   background: var(--color-text);
   border: 0;
-  border-radius: 6px;
   color: var(--color-header);
   cursor: pointer;
   font-family: var(--font-sans);
@@ -345,17 +288,7 @@
   font-weight: 700;
   min-height: 38px;
   padding: 9px 16px;
-  transition:
-    background-color 220ms ease,
-    color 220ms ease,
-    transform 220ms ease;
 }
-
-.save-text-button:hover,
-.save-text-button:focus-visible {
-  transform: translateY(-1px);
-}
-
 .admin-photo-card.is-draggable {
   cursor: grab;
   user-select: none;
@@ -376,25 +309,6 @@
   box-shadow:
     0 0 0 3px rgb(117 221 136 / 38%),
     0 18px 34px rgb(0 0 0 / 24%);
-  transform: translateY(-4px);
-}
-
-@keyframes captionSuccessPop {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 8px);
-  }
-
-  14%,
-  78% {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -4px);
-  }
 }
 
 .caption-editor {
@@ -502,4 +416,125 @@
   gap: 7px;
   justify-items: center;
   width: min(100%, 360px);
+}
+
+.trash-drop-zone {
+  align-items: center;
+  bottom: 24px;
+  display: grid;
+  height: 122px;
+  justify-items: center;
+  left: 50%;
+  pointer-events: auto;
+  position: fixed;
+  transform: translateX(-50%);
+  width: 190px;
+  z-index: 30;
+}
+
+.trash-aura {
+  background: radial-gradient(ellipse, rgb(0 0 0 / 55%) 0%, rgb(0 0 0 / 0%) 68%);
+  filter: blur(10px);
+  height: 86px;
+  position: absolute;
+  top: 28px;
+  width: 190px;
+}
+
+.trash-icon {
+  height: 82px;
+  position: relative;
+  transform: translateY(8px);
+  transition: transform 180ms ease;
+  width: 72px;
+  z-index: 1;
+}
+
+.trash-handle,
+.trash-lid,
+.trash-bin {
+  border: 5px solid var(--color-text);
+  position: absolute;
+}
+
+.trash-handle {
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  height: 14px;
+  left: 24px;
+  top: 0;
+  width: 24px;
+}
+
+.trash-lid {
+  border-left: 0;
+  border-right: 0;
+  height: 0;
+  left: 3px;
+  top: 18px;
+  transition: transform 180ms ease;
+  width: 66px;
+}
+
+.trash-bin {
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  gap: 9px;
+  height: 50px;
+  justify-content: center;
+  left: 11px;
+  padding-top: 8px;
+  top: 29px;
+  width: 50px;
+}
+
+.trash-bin span {
+  background: var(--color-text);
+  border-radius: 999px;
+  height: 34px;
+  width: 5px;
+}
+
+.trash-drop-zone.is-hovered .trash-icon {
+  transform: translateY(0) scale(1.06);
+}
+
+.trash-drop-zone.is-hovered .trash-lid {
+  transform: translate(-5px, -12px) rotate(-12deg);
+}
+
+.delete-success-toast {
+  animation: deleteToastPop 1800ms ease both;
+  background: var(--color-header);
+  border: 1px solid rgb(216 74 74 / 58%);
+  box-shadow: 0 18px 58px rgb(216 74 74 / 26%);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 22px;
+  left: 50%;
+  padding: 16px 28px;
+  pointer-events: none;
+  position: fixed;
+  text-align: center;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+}
+
+@keyframes deleteToastPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -42%);
+  }
+
+  16%,
+  78% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -58%);
+  }
 }
