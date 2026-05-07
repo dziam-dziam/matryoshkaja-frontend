@@ -83,7 +83,7 @@ export class AdminPanel {
 
   loginData = {
     email: 'matryoshkaja@gmail.com',
-    password: 'K@ja2002!!',
+    password: '',
   };
 
   selectedFile: File | null = null;
