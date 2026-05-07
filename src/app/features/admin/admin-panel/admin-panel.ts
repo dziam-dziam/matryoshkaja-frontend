@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 
 import { AuthService } from '../../../core/api/auth.service';
 import { AuthTokenService } from '../../../core/api/auth-token.service';
@@ -12,6 +13,11 @@ import { HeaderComponent } from '../../../shared/components/header-component/hea
 // CMS TEXT: pole widoczne w admin panelu.
 interface ContentField extends PageContentResponse {
   label: string;
+}
+
+interface CaptionSaveSuccess {
+  photoId: number;
+  caption: string;
 }
 
 @Component({
@@ -33,6 +39,10 @@ export class AdminPanel {
   readonly loading = signal(false);
   readonly error = signal<unknown>(null);
   readonly message = signal('');
+  readonly uploadingPhoto = signal(false);
+  readonly savingCaptionPhotoId = signal<number | null>(null);
+  readonly captionSaveSuccess = signal<CaptionSaveSuccess | null>(null);
+  private captionSuccessTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   // CMS TEXT: lista tekstow, ktore klientka moze edytowac.
   readonly contentFields = signal<ContentField[]>([
@@ -71,11 +81,8 @@ export class AdminPanel {
   };
 
   selectedFile: File | null = null;
-
-  // CAPTION CHANGE: caption used when uploading a new photo.
   newPhotoCaption = '';
 
-  // REORDER CHANGE: remembers which photo is currently being dragged.
   readonly draggedPhotoId = signal<number | null>(null);
   private dragStartPhotos: PhotoResponse[] = [];
   private dropCommitted = false;
@@ -120,7 +127,6 @@ export class AdminPanel {
     });
   }
 
-  // CMS TEXT: pobiera zapisane teksty z backendu.
   loadContent(): void {
     this.pageContentService.getAll().subscribe({
       next: (content) => {
@@ -135,7 +141,6 @@ export class AdminPanel {
     });
   }
 
-  // CMS TEXT: zapisuje teksty z panelu admina.
   saveContent(): void {
     this.clearFeedback();
 
@@ -165,31 +170,44 @@ export class AdminPanel {
       return;
     }
 
-    this.photoService.upload(this.selectedFile, this.newPhotoCaption).subscribe({
-      next: () => {
-        this.selectedFile = null;
-        // CAPTION CHANGE: clear upload caption after successful upload.
-        this.newPhotoCaption = '';
-        this.message.set('Photo uploaded.');
-        this.loadPhotos();
-      },
-      error: (error) => this.error.set(error),
-    });
+    this.uploadingPhoto.set(true);
+
+    this.photoService
+      .upload(this.selectedFile, this.newPhotoCaption)
+      .pipe(finalize(() => this.uploadingPhoto.set(false)))
+      .subscribe({
+        next: () => {
+          this.selectedFile = null;
+          this.newPhotoCaption = '';
+          this.message.set('Photo uploaded successfully.');
+          this.loadPhotos();
+        },
+        error: (error) => this.error.set(error),
+      });
   }
 
-  // CAPTION CHANGE: saves an edited caption for an existing photo.
   updateCaption(photo: PhotoResponse): void {
+    if (this.savingCaptionPhotoId() === photo.id) {
+      return;
+    }
+
     this.clearFeedback();
 
-    this.photoService.updateCaption(photo.id, { caption: photo.caption ?? '' }).subscribe({
-      next: (updatedPhoto) => {
-        this.photos.update((photos) =>
-          photos.map((item) => (item.id === updatedPhoto.id ? updatedPhoto : item)),
-        );
-        this.message.set(`Caption for photo #${photo.id} saved.`);
-      },
-      error: (error) => this.error.set(error),
-    });
+    this.savingCaptionPhotoId.set(photo.id);
+
+    this.photoService
+      .updateCaption(photo.id, { caption: photo.caption ?? '' })
+      .pipe(finalize(() => this.savingCaptionPhotoId.set(null)))
+      .subscribe({
+        next: (updatedPhoto) => {
+          this.photos.update((photos) =>
+            photos.map((item) => (item.id === updatedPhoto.id ? updatedPhoto : item)),
+          );
+          this.message.set(`Caption for photo #${photo.id} saved successfully.`);
+          this.showCaptionSuccess(updatedPhoto);
+        },
+        error: (error) => this.error.set(error),
+      });
   }
 
   deletePhoto(photoId: number): void {
@@ -204,7 +222,6 @@ export class AdminPanel {
     });
   }
 
-  // REORDER CHANGE: starts native drag/drop for a photo card.
   onDragStart(photoId: number, event: DragEvent): void {
     this.draggedPhotoId.set(photoId);
     this.dragStartPhotos = [...this.photos()];
@@ -222,7 +239,6 @@ export class AdminPanel {
     }
   }
 
-  // REORDER CHANGE: previews the new order before the admin drops the photo.
   onDragOver(targetPhotoId: number, event: DragEvent): void {
     event.preventDefault();
 
@@ -233,7 +249,6 @@ export class AdminPanel {
     this.previewPhotoOrder(targetPhotoId);
   }
 
-  // REORDER CHANGE: saves the currently previewed order.
   onDrop(event: DragEvent): void {
     event.preventDefault();
 
@@ -247,7 +262,6 @@ export class AdminPanel {
     this.savePhotoOrder();
   }
 
-  // REORDER CHANGE: restores old order when the admin cancels by dropping outside the grid.
   onDragEnd(): void {
     if (!this.dropCommitted && this.dragStartPhotos.length > 0) {
       this.setPhotosWithMotion(this.dragStartPhotos);
@@ -283,7 +297,6 @@ export class AdminPanel {
     this.setPhotosWithMotion(photos.map((photo, index) => ({ ...photo, displayOrder: index + 1 })));
   }
 
-  // REORDER CHANGE: sends the new id order to backend.
   private savePhotoOrder(): void {
     this.clearFeedback();
 
@@ -297,11 +310,12 @@ export class AdminPanel {
   }
 
   private setPhotosWithMotion(photos: PhotoResponse[]): void {
-    const documentWithViewTransitions = typeof document === 'undefined'
-      ? null
-      : (document as Document & {
-          startViewTransition?: (update: () => void) => void;
-        });
+    const documentWithViewTransitions =
+      typeof document === 'undefined'
+        ? null
+        : (document as Document & {
+            startViewTransition?: (update: () => void) => void;
+          });
 
     if (documentWithViewTransitions?.startViewTransition) {
       documentWithViewTransitions.startViewTransition(() => this.photos.set(photos));
@@ -309,6 +323,22 @@ export class AdminPanel {
     }
 
     this.photos.set(photos);
+  }
+
+  private showCaptionSuccess(photo: PhotoResponse): void {
+    if (this.captionSuccessTimeoutId) {
+      clearTimeout(this.captionSuccessTimeoutId);
+    }
+
+    this.captionSaveSuccess.set({
+      photoId: photo.id,
+      caption: photo.caption?.trim() || `Photo #${photo.id}`,
+    });
+
+    this.captionSuccessTimeoutId = setTimeout(() => {
+      this.captionSaveSuccess.set(null);
+      this.captionSuccessTimeoutId = null;
+    }, 800);
   }
 
   private clearFeedback(): void {

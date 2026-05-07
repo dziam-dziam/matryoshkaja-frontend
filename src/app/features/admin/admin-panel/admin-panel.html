@@ -1,19 +1,12 @@
-<app-header-component />
+<app-header-component sectionTitle="Admin Panel" />
 
 <main class="admin-lookbook" [class.locked]="!isLoggedIn()">
-  <section class="admin-intro" aria-label="Admin lookbook introduction">
-    <p>Admin panel</p>
-  </section>
-
-  @if (message()) {
-    <p class="admin-message">{{ message() }}</p>
-  }
+  <section class="admin-intro" aria-label="Admin lookbook introduction"></section>
 
   @if (error()) {
-    <p class="admin-error">Something went wrong. Please try again.</p>
+    <p class="admin-error" aria-live="assertive">Something went wrong. Please try again.</p>
   }
 
-  <!-- CMS TEXT: edytor tekstow strony widoczny tylko po zalogowaniu. -->
   @if (isLoggedIn()) {
     <section class="content-editor" aria-label="Editable page text fields">
       <div class="editor-header">
@@ -43,6 +36,7 @@
           class="admin-photo-card"
           [class.is-draggable]="isLoggedIn()"
           [class.is-dragging]="isDragging(photo.id)"
+          [class.is-caption-success]="captionSaveSuccess()?.photoId === photo.id"
           [attr.draggable]="isLoggedIn() ? 'true' : null"
           [style.view-transition-name]="'photo-card-' + photo.id"
           (dragstart)="onDragStart(photo.id, $event)"
@@ -64,7 +58,6 @@
           </div>
 
           @if (isLoggedIn()) {
-            <!-- CAPTION CHANGE: admin can edit a caption after the photo exists. -->
             <label class="caption-editor">
               <span>Photo caption</span>
               <input
@@ -72,15 +65,26 @@
                 [(ngModel)]="photo.caption"
                 [name]="'caption-' + photo.id"
                 placeholder="Photo caption"
+                [disabled]="savingCaptionPhotoId() === photo.id"
                 (keydown.enter)="updateCaption(photo)"
               />
             </label>
 
-            <button type="button" class="save-caption-button" (click)="updateCaption(photo)">
-              Save caption
+            <button
+              type="button"
+              class="save-caption-button"
+              [class.is-loading]="savingCaptionPhotoId() === photo.id"
+              [disabled]="savingCaptionPhotoId() === photo.id"
+              (click)="updateCaption(photo)"
+            >
+              @if (savingCaptionPhotoId() === photo.id) {
+                <span class="loading-spinner" aria-hidden="true"></span>
+                <span>Saving...</span>
+              } @else {
+                <span>Save caption</span>
+              }
             </button>
           } @else {
-            <!-- CAPTION CHANGE: fallback for photos without a custom caption. -->
             <p class="photo-meta">{{ photo.caption || 'Photo #' + photo.id }}</p>
           }
         </article>
@@ -90,7 +94,6 @@
 
   @if (isLoggedIn()) {
     <div class="admin-actions">
-      <!-- CAPTION CHANGE: caption is filled before selecting the new photo file. -->
       <div class="upload-panel">
         <label class="new-caption-field">
           <span>New photo caption</span>
@@ -99,13 +102,24 @@
             [(ngModel)]="newPhotoCaption"
             name="newPhotoCaption"
             placeholder="Photo caption"
+            [disabled]="uploadingPhoto()"
           />
         </label>
 
-        <label class="add-button">
-          <span>Add Photo</span>
-          <span class="add-arrow">&rarr;</span>
-          <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+        <label class="add-button" [class.is-loading]="uploadingPhoto()">
+          @if (uploadingPhoto()) {
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <span>Uploading...</span>
+          } @else {
+            <span>Add Photo</span>
+            <span class="add-arrow">&rarr;</span>
+          }
+          <input
+            type="file"
+            accept="image/*"
+            [disabled]="uploadingPhoto()"
+            (change)="onFileSelected($event)"
+          />
         </label>
       </div>
 

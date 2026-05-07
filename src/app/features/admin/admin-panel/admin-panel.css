@@ -7,24 +7,8 @@
   position: relative;
 }
 
-.admin-lookbook.locked {
-  min-height: 520px;
-}
-
-.admin-intro {
-  color: var(--color-text);
-  font-family: var(--font-display);
-  font-size: 12.3px;
-  line-height: 1.35;
-  margin: 0 auto;
-  max-width: 780px;
-  text-align: center;
-}
-
-.admin-intro p,
 .photo-meta,
 .state,
-.admin-message,
 .admin-error {
   margin: 0;
 }
@@ -41,14 +25,11 @@
   display: grid;
   gap: 8px;
   justify-items: center;
-}
-
-.admin-photo-card:nth-child(2n) {
-  animation-delay: 120ms;
-}
-
-.admin-photo-card:nth-child(3n) {
-  animation-delay: 220ms;
+  position: relative;
+  transition:
+    filter 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
 }
 
 .photo-frame {
@@ -124,7 +105,6 @@
   transform: scale(1.05);
 }
 
-
 .admin-actions {
   display: grid;
   gap: 14px;
@@ -156,12 +136,14 @@
   border: 2px solid var(--color-text);
   color: var(--color-text);
   display: inline-flex;
+  gap: 10px;
   font-family: var(--font-display);
   font-size: 22px;
   font-weight: 700;
   justify-content: center;
   justify-self: center;
   min-height: 52px;
+  min-width: 292px;
   padding: 0 96px;
   width: fit-content;
 }
@@ -180,30 +162,15 @@
   background: var(--color-muted);
 }
 
-.add-button:hover .add-arrow,
-.add-button:focus-within .add-arrow {
-  animation: arrowNudge 520ms ease both;
+.add-button.is-loading {
+  background: var(--color-muted);
+  cursor: wait;
+  pointer-events: none;
 }
 
 .add-arrow {
   margin-left: 10px;
 }
-
-@keyframes arrowNudge {
-  0% {
-    transform: translateX(0);
-  }
-
-  45% {
-    transform: translateX(10px);
-  }
-
-  100% {
-    transform: translateX(6px);
-  }
-}
-
-
 
 .add-button input {
   display: none;
@@ -316,7 +283,7 @@
     top: -10px;
   }
 }
-/* CMS TEXT: panel edycji tekstów strony. */
+
 .content-editor {
   border: 1px solid rgb(241 241 241 / 26%);
   color: var(--color-text);
@@ -388,27 +355,7 @@
 .save-text-button:focus-visible {
   transform: translateY(-1px);
 }
-/* REORDER CHANGE: visual hint that photo cards can be moved by admin. */
-.admin-photo-card.is-draggable {
-  cursor: grab;
-}
 
-.admin-photo-card.is-draggable:active {
-  cursor: grabbing;
-  opacity: 0.72;
-}
-.admin-photo-card {
-  animation: softReveal 680ms ease-out both;
-  display: grid;
-  gap: 8px;
-  justify-items: center;
-  transition:
-    filter 180ms ease,
-    opacity 180ms ease,
-    transform 180ms ease;
-}
-
-/* REORDER CHANGE: karta jest draggable po zalogowaniu. */
 .admin-photo-card.is-draggable {
   cursor: grab;
   user-select: none;
@@ -418,15 +365,38 @@
   cursor: grabbing;
 }
 
-/* REORDER CHANGE: karta, którą aktualnie trzymamy. */
 .admin-photo-card.is-dragging {
   filter: saturate(0.8) brightness(0.86);
   opacity: 0.68;
   transform: scale(0.98);
 }
-/* Dopisz te style do swojego admin-panel.css albo wklej caly plik z mojej poprzedniej wersji. */
 
-/* CAPTION CHANGE: inline editor for photo captions in admin lookbook. */
+.admin-photo-card.is-caption-success .photo-frame img,
+.admin-photo-card.is-caption-success .caption-editor input {
+  box-shadow:
+    0 0 0 3px rgb(117 221 136 / 38%),
+    0 18px 34px rgb(0 0 0 / 24%);
+  transform: translateY(-4px);
+}
+
+@keyframes captionSuccessPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+
+  14%,
+  78% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -4px);
+  }
+}
+
 .caption-editor {
   color: var(--color-muted);
   display: grid;
@@ -458,15 +428,26 @@
   outline: none;
 }
 
+.caption-editor input:disabled,
+.new-caption-field input:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .save-caption-button {
+  align-items: center;
   background: transparent;
   border: 1px solid rgb(241 241 241 / 34%);
   color: var(--color-muted);
   cursor: pointer;
+  display: inline-flex;
+  gap: 8px;
+  justify-content: center;
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 700;
   min-height: 32px;
+  min-width: 126px;
   padding: 6px 14px;
   transition:
     border-color 220ms ease,
@@ -481,7 +462,31 @@
   transform: translateY(-1px);
 }
 
-/* CAPTION CHANGE: upload area now has caption input + file button. */
+.save-caption-button:disabled,
+.save-caption-button.is-loading {
+  border-color: rgb(241 241 241 / 22%);
+  color: var(--color-muted);
+  cursor: wait;
+  opacity: 0.8;
+  transform: none;
+}
+
+.loading-spinner {
+  animation: spinnerTurn 760ms linear infinite;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  height: 16px;
+  width: 16px;
+}
+
+@keyframes spinnerTurn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .upload-panel {
   display: grid;
   gap: 12px;
