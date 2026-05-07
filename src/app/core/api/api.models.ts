@@ -16,9 +16,15 @@ export interface AdminResponse {
 export interface PhotoResponse {
   id: number;
   imageUrl: string;
-
+  // CAPTION CHANGE: editable text displayed under the photo.
+  caption: string;
   // REORDER CHANGE: current saved photo position in lookbook.
   displayOrder: number;
+}
+
+// CAPTION CHANGE: request used when admin edits a photo caption.
+export interface PhotoCaptionUpdateRequest {
+  caption: string;
 }
 
 // REORDER CHANGE: ids in the exact order selected in admin panel.

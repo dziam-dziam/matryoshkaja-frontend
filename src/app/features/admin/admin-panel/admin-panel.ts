@@ -9,6 +9,7 @@ import { PhotoService } from '../../../core/api/photo.service';
 import { FooterComponent } from '../../../shared/components/footer-component/footer-component';
 import { HeaderComponent } from '../../../shared/components/header-component/header-component';
 
+// CMS TEXT: pole widoczne w admin panelu.
 interface ContentField extends PageContentResponse {
   label: string;
 }
@@ -33,6 +34,7 @@ export class AdminPanel {
   readonly error = signal<unknown>(null);
   readonly message = signal('');
 
+  // CMS TEXT: lista tekstow, ktore klientka moze edytowac.
   readonly contentFields = signal<ContentField[]>([
     {
       key: 'lookbook.intro',
@@ -59,7 +61,7 @@ export class AdminPanel {
       key: 'about.section3.text',
       label: 'About section 3 text',
       value:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed rhoncus ligula sit amet egestas condimentum.',
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed rhoncus ligula sit amet est egestas condimentum.',
     },
   ]);
 
@@ -70,9 +72,11 @@ export class AdminPanel {
 
   selectedFile: File | null = null;
 
-  // REORDER CHANGE: aktualnie przeciągane zdjęcie.
-  readonly draggedPhotoId = signal<number | null>(null);
+  // CAPTION CHANGE: caption used when uploading a new photo.
+  newPhotoCaption = '';
 
+  // REORDER CHANGE: remembers which photo is currently being dragged.
+  readonly draggedPhotoId = signal<number | null>(null);
   private dragStartPhotos: PhotoResponse[] = [];
   private dropCommitted = false;
 
@@ -116,6 +120,7 @@ export class AdminPanel {
     });
   }
 
+  // CMS TEXT: pobiera zapisane teksty z backendu.
   loadContent(): void {
     this.pageContentService.getAll().subscribe({
       next: (content) => {
@@ -130,6 +135,7 @@ export class AdminPanel {
     });
   }
 
+  // CMS TEXT: zapisuje teksty z panelu admina.
   saveContent(): void {
     this.clearFeedback();
 
@@ -159,11 +165,28 @@ export class AdminPanel {
       return;
     }
 
-    this.photoService.upload(this.selectedFile).subscribe({
+    this.photoService.upload(this.selectedFile, this.newPhotoCaption).subscribe({
       next: () => {
         this.selectedFile = null;
+        // CAPTION CHANGE: clear upload caption after successful upload.
+        this.newPhotoCaption = '';
         this.message.set('Photo uploaded.');
         this.loadPhotos();
+      },
+      error: (error) => this.error.set(error),
+    });
+  }
+
+  // CAPTION CHANGE: saves an edited caption for an existing photo.
+  updateCaption(photo: PhotoResponse): void {
+    this.clearFeedback();
+
+    this.photoService.updateCaption(photo.id, { caption: photo.caption ?? '' }).subscribe({
+      next: (updatedPhoto) => {
+        this.photos.update((photos) =>
+          photos.map((item) => (item.id === updatedPhoto.id ? updatedPhoto : item)),
+        );
+        this.message.set(`Caption for photo #${photo.id} saved.`);
       },
       error: (error) => this.error.set(error),
     });
@@ -181,7 +204,7 @@ export class AdminPanel {
     });
   }
 
-  // REORDER CHANGE: start przeciągania całej karty zdjęcia.
+  // REORDER CHANGE: starts native drag/drop for a photo card.
   onDragStart(photoId: number, event: DragEvent): void {
     this.draggedPhotoId.set(photoId);
     this.dragStartPhotos = [...this.photos()];
@@ -199,7 +222,7 @@ export class AdminPanel {
     }
   }
 
-  // REORDER CHANGE: preview kolejności jeszcze przed puszczeniem zdjęcia.
+  // REORDER CHANGE: previews the new order before the admin drops the photo.
   onDragOver(targetPhotoId: number, event: DragEvent): void {
     event.preventDefault();
 
@@ -210,7 +233,7 @@ export class AdminPanel {
     this.previewPhotoOrder(targetPhotoId);
   }
 
-  // REORDER CHANGE: zapisuje aktualnie widoczny preview order.
+  // REORDER CHANGE: saves the currently previewed order.
   onDrop(event: DragEvent): void {
     event.preventDefault();
 
@@ -224,7 +247,7 @@ export class AdminPanel {
     this.savePhotoOrder();
   }
 
-  // REORDER CHANGE: jeśli admin puści poza galerią, wracamy do starej kolejności.
+  // REORDER CHANGE: restores old order when the admin cancels by dropping outside the grid.
   onDragEnd(): void {
     if (!this.dropCommitted && this.dragStartPhotos.length > 0) {
       this.setPhotosWithMotion(this.dragStartPhotos);
@@ -260,6 +283,7 @@ export class AdminPanel {
     this.setPhotosWithMotion(photos.map((photo, index) => ({ ...photo, displayOrder: index + 1 })));
   }
 
+  // REORDER CHANGE: sends the new id order to backend.
   private savePhotoOrder(): void {
     this.clearFeedback();
 
@@ -273,12 +297,11 @@ export class AdminPanel {
   }
 
   private setPhotosWithMotion(photos: PhotoResponse[]): void {
-    const documentWithViewTransitions =
-      typeof document === 'undefined'
-        ? null
-        : (document as Document & {
-            startViewTransition?: (update: () => void) => void;
-          });
+    const documentWithViewTransitions = typeof document === 'undefined'
+      ? null
+      : (document as Document & {
+          startViewTransition?: (update: () => void) => void;
+        });
 
     if (documentWithViewTransitions?.startViewTransition) {
       documentWithViewTransitions.startViewTransition(() => this.photos.set(photos));

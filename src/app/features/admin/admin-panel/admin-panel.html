@@ -13,6 +13,7 @@
     <p class="admin-error">Something went wrong. Please try again.</p>
   }
 
+  <!-- CMS TEXT: edytor tekstow strony widoczny tylko po zalogowaniu. -->
   @if (isLoggedIn()) {
     <section class="content-editor" aria-label="Editable page text fields">
       <div class="editor-header">
@@ -62,7 +63,26 @@
             }
           </div>
 
-          <p class="photo-meta">Photo #{{ photo.id }}</p>
+          @if (isLoggedIn()) {
+            <!-- CAPTION CHANGE: admin can edit a caption after the photo exists. -->
+            <label class="caption-editor">
+              <span>Photo caption</span>
+              <input
+                type="text"
+                [(ngModel)]="photo.caption"
+                [name]="'caption-' + photo.id"
+                placeholder="Photo caption"
+                (keydown.enter)="updateCaption(photo)"
+              />
+            </label>
+
+            <button type="button" class="save-caption-button" (click)="updateCaption(photo)">
+              Save caption
+            </button>
+          } @else {
+            <!-- CAPTION CHANGE: fallback for photos without a custom caption. -->
+            <p class="photo-meta">{{ photo.caption || 'Photo #' + photo.id }}</p>
+          }
         </article>
       }
     </section>
@@ -70,11 +90,24 @@
 
   @if (isLoggedIn()) {
     <div class="admin-actions">
-      <label class="add-button">
-        <span>Add Photo</span>
-        <span class="add-arrow">&rarr;</span>
-        <input type="file" accept="image/*" (change)="onFileSelected($event)" />
-      </label>
+      <!-- CAPTION CHANGE: caption is filled before selecting the new photo file. -->
+      <div class="upload-panel">
+        <label class="new-caption-field">
+          <span>New photo caption</span>
+          <input
+            type="text"
+            [(ngModel)]="newPhotoCaption"
+            name="newPhotoCaption"
+            placeholder="Photo caption"
+          />
+        </label>
+
+        <label class="add-button">
+          <span>Add Photo</span>
+          <span class="add-arrow">&rarr;</span>
+          <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+        </label>
+      </div>
 
       <button type="button" class="logout-button" (click)="logout()">Wyloguj</button>
     </div>

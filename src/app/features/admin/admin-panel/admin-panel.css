@@ -424,3 +424,77 @@
   opacity: 0.68;
   transform: scale(0.98);
 }
+/* Dopisz te style do swojego admin-panel.css albo wklej caly plik z mojej poprzedniej wersji. */
+
+/* CAPTION CHANGE: inline editor for photo captions in admin lookbook. */
+.caption-editor {
+  color: var(--color-muted);
+  display: grid;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  gap: 7px;
+  justify-items: center;
+  width: min(100%, 452.4px);
+}
+
+.caption-editor input,
+.new-caption-field input {
+  background: var(--color-header);
+  border: 1px solid rgb(241 241 241 / 28%);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 16px;
+  line-height: 1.35;
+  min-height: 42px;
+  padding: 9px 12px;
+  text-align: center;
+  width: 100%;
+}
+
+.caption-editor input:focus,
+.new-caption-field input:focus {
+  border-color: var(--color-text);
+  outline: none;
+}
+
+.save-caption-button {
+  background: transparent;
+  border: 1px solid rgb(241 241 241 / 34%);
+  color: var(--color-muted);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  min-height: 32px;
+  padding: 6px 14px;
+  transition:
+    border-color 220ms ease,
+    color 220ms ease,
+    transform 220ms ease;
+}
+
+.save-caption-button:hover,
+.save-caption-button:focus-visible {
+  border-color: var(--color-text);
+  color: var(--color-text);
+  transform: translateY(-1px);
+}
+
+/* CAPTION CHANGE: upload area now has caption input + file button. */
+.upload-panel {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.new-caption-field {
+  color: var(--color-muted);
+  display: grid;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  gap: 7px;
+  justify-items: center;
+  width: min(100%, 360px);
+}
