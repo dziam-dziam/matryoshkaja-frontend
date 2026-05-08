@@ -72,10 +72,6 @@ a:focus-visible::after {
   white-space: nowrap;
 }
 
-.site-footer:hover .footer-brand {
-  letter-spacing: clamp(0.13em, 2.08vw, 0.25em);
-  text-shadow: 0 22px 42px rgb(0 0 0 / 28%);
-}
 
 @media (max-width: 900px) {
   .site-footer {

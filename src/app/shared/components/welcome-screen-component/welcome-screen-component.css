@@ -489,7 +489,37 @@
       font-size: 46px;
       letter-spacing: 0.08em;
     }
+
+    .drip-1,
+.drip-3,
+.drip-5,
+.drip-7,
+.drip-8,
+.drip-9,
+.drip-11,
+.drip-13,
+.drip-15,
+.drip-16,
+.drip-17,
+.drip-19,
+.drip-20,
+.drip-21,
+.drip-23,
+.drip-24,
+.drip-25,
+.drip-28,
+.drip-29,
+.drip-31,
+.drip-32,
+.drip-35,
+.drip-36,
+.drip-37 {
+  display: none;
+}
+
   }
+
+  
   
   @media (prefers-reduced-motion: reduce) {
     .welcome-screen {

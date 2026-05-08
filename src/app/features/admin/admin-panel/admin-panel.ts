@@ -10,7 +10,6 @@ import { PhotoService } from '../../../core/api/photo.service';
 import { FooterComponent } from '../../../shared/components/footer-component/footer-component';
 import { HeaderComponent } from '../../../shared/components/header-component/header-component';
 
-// CMS TEXT: pole widoczne w admin panelu.
 interface ContentField extends PageContentResponse {
   label: string;
 }
@@ -38,19 +37,24 @@ export class AdminPanel {
   readonly photos = signal<PhotoResponse[]>([]);
   readonly loading = signal(false);
   readonly error = signal<unknown>(null);
+  readonly loginError = signal(false);
   readonly message = signal('');
   readonly uploadingPhoto = signal(false);
   readonly savingCaptionPhotoId = signal<number | null>(null);
   readonly captionSaveSuccess = signal<CaptionSaveSuccess | null>(null);
   readonly trashHover = signal(false);
+  readonly loggingIn = signal(false);
+  readonly goingBackToMainPage = signal(false);
   readonly deletingPhotoId = signal<number | null>(null);
   readonly deleteSuccess = signal(false);
-  readonly contentSaveSuccess = signal(false);
+  readonly savingContent = signal(false);
+  readonly toastMessage = signal('');
+  readonly toastType = signal<'success' | 'error'>('success');
+
   private captionSuccessTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private deleteSuccessTimeoutId: ReturnType<typeof setTimeout> | null = null;
-  private contentSuccessTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private toastTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
-  // CMS TEXT: lista tekstow, ktore klientka moze edytowac.
   readonly contentFields = signal<ContentField[]>([
     {
       key: 'lookbook.intro',
@@ -87,11 +91,8 @@ export class AdminPanel {
   };
 
   selectedFile: File | null = null;
-
-  // CAPTION CHANGE: caption used when uploading a new photo.
   newPhotoCaption = '';
 
-  // REORDER CHANGE: remembers which photo is currently being dragged.
   readonly draggedPhotoId = signal<number | null>(null);
   private dragStartPhotos: PhotoResponse[] = [];
   private dropCommitted = false;
@@ -103,22 +104,38 @@ export class AdminPanel {
 
   login(): void {
     this.clearFeedback();
-
-    this.authService.login(this.loginData).subscribe({
-      next: () => {
-        this.message.set('Logged in.');
-        this.loadPhotos();
-        this.loadContent();
-      },
-      error: (error) => this.error.set(error),
-    });
+    this.loggingIn.set(true);
+  
+    this.authService
+      .login(this.loginData)
+      .pipe(finalize(() => this.loggingIn.set(false)))
+      .subscribe({
+        next: () => {
+          this.loginError.set(false);
+          this.message.set('Logged in.');
+          this.loadPhotos();
+          this.loadContent();
+        },
+        error: () => this.loginError.set(true),
+      });
   }
+  
 
   logout(): void {
     this.authService.logout();
     this.message.set('Logged out.');
     this.error.set(null);
+    this.loginError.set(false);
   }
+
+  clearLoginError(): void {
+    this.loginError.set(false);
+  }
+
+  showBackNavigationLoading(): void {
+    this.goingBackToMainPage.set(true);
+  }
+  
 
   loadPhotos(): void {
     this.loading.set(true);
@@ -136,7 +153,6 @@ export class AdminPanel {
     });
   }
 
-  // CMS TEXT: pobiera zapisane teksty z backendu.
   loadContent(): void {
     this.pageContentService.getAll().subscribe({
       next: (content) => {
@@ -151,18 +167,21 @@ export class AdminPanel {
     });
   }
 
-  // CMS TEXT: zapisuje teksty z panelu admina.
   saveContent(): void {
     this.clearFeedback();
+    this.savingContent.set(true);
 
     this.pageContentService
       .updateAll(this.contentFields().map(({ key, value }) => ({ key, value })))
+      .pipe(finalize(() => this.savingContent.set(false)))
       .subscribe({
         next: () => {
           this.message.set('Text fields saved.');
-          this.showContentSuccess();
+          this.showToast('Text fields have been updated', 'success');
         },
-        error: (error) => this.error.set(error),
+        error: () => {
+          this.showToast('There was an error with updating text fields', 'error');
+        },
       });
   }
 
@@ -180,7 +199,7 @@ export class AdminPanel {
     this.clearFeedback();
 
     if (!this.selectedFile) {
-      this.error.set({ message: 'Choose a file first.' });
+      this.showToast('There was an error with adding photo', 'error');
       return;
     }
 
@@ -192,23 +211,23 @@ export class AdminPanel {
       .subscribe({
         next: () => {
           this.selectedFile = null;
-          // CAPTION CHANGE: clear upload caption after successful upload.
           this.newPhotoCaption = '';
           this.message.set('Photo uploaded successfully.');
+          this.showToast('Photo has been added', 'success');
           this.loadPhotos();
         },
-        error: (error) => this.error.set(error),
+        error: () => {
+          this.showToast('There was an error with adding photo', 'error');
+        },
       });
   }
 
-  // CAPTION CHANGE: saves an edited caption for an existing photo.
   updateCaption(photo: PhotoResponse): void {
     if (this.savingCaptionPhotoId() === photo.id) {
       return;
     }
 
     this.clearFeedback();
-
     this.savingCaptionPhotoId.set(photo.id);
 
     this.photoService
@@ -238,7 +257,6 @@ export class AdminPanel {
     });
   }
 
-  // REORDER CHANGE: starts native drag/drop for a photo card.
   onDragStart(photoId: number, event: DragEvent): void {
     this.draggedPhotoId.set(photoId);
     this.dragStartPhotos = [...this.photos()];
@@ -257,7 +275,6 @@ export class AdminPanel {
     }
   }
 
-  // REORDER CHANGE: previews the new order before the admin drops the photo.
   onDragOver(targetPhotoId: number, event: DragEvent): void {
     event.preventDefault();
 
@@ -268,7 +285,6 @@ export class AdminPanel {
     this.previewPhotoOrder(targetPhotoId);
   }
 
-  // REORDER CHANGE: saves the currently previewed order.
   onDrop(event: DragEvent): void {
     event.preventDefault();
 
@@ -310,7 +326,6 @@ export class AdminPanel {
     this.deletePhotoFromTrash(photoId);
   }
 
-  // REORDER CHANGE: restores old order when the admin cancels by dropping outside the grid.
   onDragEnd(): void {
     if (!this.dropCommitted && this.dragStartPhotos.length > 0) {
       this.setPhotosWithMotion(this.dragStartPhotos);
@@ -347,7 +362,6 @@ export class AdminPanel {
     this.setPhotosWithMotion(photos.map((photo, index) => ({ ...photo, displayOrder: index + 1 })));
   }
 
-  // REORDER CHANGE: sends the new id order to backend.
   private savePhotoOrder(): void {
     this.clearFeedback();
 
@@ -387,11 +401,12 @@ export class AdminPanel {
   }
 
   private setPhotosWithMotion(photos: PhotoResponse[]): void {
-    const documentWithViewTransitions = typeof document === 'undefined'
-      ? null
-      : (document as Document & {
-          startViewTransition?: (update: () => void) => void;
-        });
+    const documentWithViewTransitions =
+      typeof document === 'undefined'
+        ? null
+        : (document as Document & {
+            startViewTransition?: (update: () => void) => void;
+          });
 
     if (documentWithViewTransitions?.startViewTransition) {
       documentWithViewTransitions.startViewTransition(() => this.photos.set(photos));
@@ -430,21 +445,23 @@ export class AdminPanel {
     }, 1800);
   }
 
-  private showContentSuccess(): void {
-    if (this.contentSuccessTimeoutId) {
-      clearTimeout(this.contentSuccessTimeoutId);
+  private showToast(message: string, type: 'success' | 'error' = 'success'): void {
+    if (this.toastTimeoutId) {
+      clearTimeout(this.toastTimeoutId);
     }
 
-    this.contentSaveSuccess.set(true);
+    this.toastMessage.set(message);
+    this.toastType.set(type);
 
-    this.contentSuccessTimeoutId = setTimeout(() => {
-      this.contentSaveSuccess.set(false);
-      this.contentSuccessTimeoutId = null;
-    }, 800);
+    this.toastTimeoutId = setTimeout(() => {
+      this.toastMessage.set('');
+      this.toastTimeoutId = null;
+    }, 2600);
   }
 
   private clearFeedback(): void {
     this.message.set('');
     this.error.set(null);
+    this.loginError.set(false);
   }
 }

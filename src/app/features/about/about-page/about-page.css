@@ -50,7 +50,7 @@
     box-shadow 280ms ease,
     filter 280ms ease,
     transform 280ms ease;
-  width: min(100%, 396.3px);
+  width: min(100%, 320.3px);
 }
 
 .about-image:nth-of-type(2) {
@@ -83,6 +83,6 @@
   .about-image {
     height: auto;
     max-height: 504.3px;
-    width: 100%;
+    width: min(100%, 320.3px);
   }
 }

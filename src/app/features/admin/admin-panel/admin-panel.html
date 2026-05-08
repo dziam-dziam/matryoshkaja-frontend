@@ -7,17 +7,29 @@
     <p class="admin-error" aria-live="assertive">Something went wrong. Please try again.</p>
   }
 
-  <!-- CMS TEXT: edytor tekstow strony widoczny tylko po zalogowaniu. -->
   @if (isLoggedIn()) {
     <section class="content-editor" aria-label="Editable page text fields">
       <div class="editor-header">
         <h2>Page text</h2>
-        <button type="button" class="save-text-button" (click)="saveContent()">Save text</button>
+        <button
+          type="button"
+          class="save-text-button"
+          [class.is-saving]="savingContent()"
+          [disabled]="savingContent()"
+          (click)="saveContent()"
+        >
+          @if (savingContent()) {
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <span>Saving...</span>
+          } @else {
+            <span>Save text</span>
+          }
+        </button>
       </div>
 
       <div class="content-fields">
         @for (field of contentFields(); track field.key) {
-          <label [class.is-content-success]="contentSaveSuccess()">
+          <label>
             {{ field.label }}
             <textarea [(ngModel)]="field.value" rows="3"></textarea>
           </label>
@@ -50,9 +62,7 @@
           </div>
 
           @if (isLoggedIn()) {
-            <!-- CAPTION CHANGE: admin can edit a caption after the photo exists. -->
             <label class="caption-editor">
-              <span>Photo caption</span>
               <input
                 type="text"
                 [(ngModel)]="photo.caption"
@@ -78,7 +88,6 @@
               }
             </button>
           } @else {
-            <!-- CAPTION CHANGE: fallback for photos without a custom caption. -->
             <p class="photo-meta">{{ photo.caption || 'Photo #' + photo.id }}</p>
           }
         </article>
@@ -88,7 +97,6 @@
 
   @if (isLoggedIn()) {
     <div class="admin-actions">
-      <!-- CAPTION CHANGE: caption is filled before selecting the new photo file. -->
       <div class="upload-panel">
         <label class="new-caption-field">
           <span>New photo caption</span>
@@ -150,27 +158,77 @@
   <div class="delete-success-toast" aria-live="polite">Photo was deleted</div>
 }
 
+@if (toastMessage()) {
+  <div
+    class="content-save-toast"
+    [class.is-success]="toastType() === 'success'"
+    [class.is-error]="toastType() === 'error'"
+    [attr.aria-live]="toastType() === 'error' ? 'assertive' : 'polite'"
+  >
+    {{ toastMessage() }}
+  </div>
+}
+
 @if (!isLoggedIn()) {
   <section class="login-overlay" aria-label="Admin login">
     <form class="login-modal" (ngSubmit)="login()">
       <h1>Admin login</h1>
 
-      <label>
+      <label [class.has-login-error]="loginError()">
         Email
-        <input type="email" [(ngModel)]="loginData.email" name="email" autocomplete="username" />
+        <input
+          type="email"
+          [(ngModel)]="loginData.email"
+          name="email"
+          autocomplete="username"
+          [class.has-login-error]="loginError()"
+          [attr.aria-invalid]="loginError()"
+          (input)="clearLoginError()"
+        />
       </label>
 
-      <label>
+      <label [class.has-login-error]="loginError()">
         Password
         <input
           type="password"
           [(ngModel)]="loginData.password"
           name="password"
           autocomplete="current-password"
+          [class.has-login-error]="loginError()"
+          [attr.aria-invalid]="loginError()"
+          [attr.aria-describedby]="loginError() ? 'login-password-error' : null"
+          (input)="clearLoginError()"
         />
+
+        @if (loginError()) {
+          <span id="login-password-error" class="login-field-error">
+            Wrong credentials, try again
+          </span>
+        }
       </label>
 
-      <button type="submit">Log in</button>
+      <button type="submit" [disabled]="loggingIn()">
+        @if (loggingIn()) {
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <span>Logging in...</span>
+        } @else {
+          <span>Log in</span>
+        }
+      </button>
+
+      <a
+        class="login-back-link"
+        href="/lookbook"
+        [class.is-loading]="goingBackToMainPage()"
+        (click)="showBackNavigationLoading()"
+      >
+        @if (goingBackToMainPage()) {
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <span>Going back...</span>
+        } @else {
+          <span>Go back to main page</span>
+        }
+      </a>
     </form>
   </section>
 }

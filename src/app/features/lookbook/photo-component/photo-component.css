@@ -7,13 +7,13 @@
 img {
   background: #171717;
   display: block;
-  height: 444.3px;
+  height: 460px;
   object-fit: cover;
   transition:
     box-shadow 260ms ease,
     filter 260ms ease,
     transform 260ms ease;
-  width: min(100%, 452.4px);
+  width: min(100%, 320px);
 }
 
 .photo-meta {

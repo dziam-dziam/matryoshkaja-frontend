@@ -1,7 +1,7 @@
 .photo-grid {
   display: grid;
-  gap: 34px 108px;
-  grid-template-columns: repeat(2, minmax(280px, 452.4px));
+  gap: 34px 48px;
+  grid-template-columns: repeat(4, minmax(200px, 320px));
   justify-content: center;
 }
 
@@ -18,7 +18,7 @@
 }
 
 .state {
-  color: var(--color-text);
+  color: var(--color-page-text);
   font-family: var(--font-display);
   font-size: 12.3px;
   margin: 0;
@@ -27,19 +27,19 @@
 }
 
 .error {
-  color: #f1b6b6;
+  color: #8d3535;
 }
 
 @media (max-width: 1040px) {
   .photo-grid {
-    gap: 30px 42px;
-    grid-template-columns: repeat(2, minmax(240px, 452.4px));
+    gap: 30px 36px;
+    grid-template-columns: repeat(3, minmax(220px, 320px));
   }
 }
 
 @media (max-width: 640px) {
   .photo-grid {
     gap: 28px;
-    grid-template-columns: minmax(0, 452.4px);
+    grid-template-columns: repeat(2,minmax(0, 320px));
   }
 }
