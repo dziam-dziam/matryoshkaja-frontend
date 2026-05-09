@@ -1,13 +1,13 @@
 <app-header-component sectionTitle="Admin Panel" />
 
-<main class="admin-lookbook" [class.locked]="!isLoggedIn()">
-  <section class="admin-intro" aria-label="Admin lookbook introduction"></section>
+@if (isLoggedIn()) {
+  <main class="admin-lookbook">
+    <section class="admin-intro" aria-label="Admin lookbook introduction"></section>
 
-  @if (error()) {
-    <p class="admin-error" aria-live="assertive">Something went wrong. Please try again.</p>
-  }
+    @if (error()) {
+      <p class="admin-error" aria-live="assertive">Something went wrong. Please try again.</p>
+    }
 
-  @if (isLoggedIn()) {
     <section class="content-editor" aria-label="Editable page text fields">
       <div class="editor-header">
         <h2>Page text</h2>
@@ -36,32 +36,29 @@
         }
       </div>
     </section>
-  }
 
-  @if (loading()) {
-    <p class="state">Loading photos...</p>
-  } @else if (photos().length === 0) {
-    <p class="state">No photos yet.</p>
-  } @else {
-    <section class="admin-photo-grid" aria-label="Admin lookbook photos">
-      @for (photo of photos(); track photo.id) {
-        <article
-          class="admin-photo-card"
-          [class.is-draggable]="isLoggedIn()"
-          [class.is-dragging]="isDragging(photo.id)"
-          [class.is-caption-success]="captionSaveSuccess()?.photoId === photo.id"
-          [attr.draggable]="isLoggedIn() ? 'true' : null"
-          [style.view-transition-name]="'photo-card-' + photo.id"
-          (dragstart)="onDragStart(photo.id, $event)"
-          (dragover)="onDragOver(photo.id, $event)"
-          (drop)="onDrop($event)"
-          (dragend)="onDragEnd()"
-        >
-          <div class="photo-frame">
-            <img [src]="photo.imageUrl" [alt]="'Matryoshkaja photo ' + photo.id" />
-          </div>
+    @if (loading()) {
+      <p class="state">Loading photos...</p>
+    } @else if (photos().length === 0) {
+      <p class="state">No photos yet.</p>
+    } @else {
+      <section class="admin-photo-grid" aria-label="Admin lookbook photos">
+        @for (photo of photos(); track photo.id) {
+          <article
+            class="admin-photo-card is-draggable"
+            [class.is-dragging]="isDragging(photo.id)"
+            [class.is-caption-success]="captionSaveSuccess()?.photoId === photo.id"
+            draggable="true"
+            [style.view-transition-name]="'photo-card-' + photo.id"
+            (dragstart)="onDragStart(photo.id, $event)"
+            (dragover)="onDragOver(photo.id, $event)"
+            (drop)="onDrop($event)"
+            (dragend)="onDragEnd()"
+          >
+            <div class="photo-frame">
+              <img [src]="photo.imageUrl" [alt]="'Matryoshkaja photo ' + photo.id" />
+            </div>
 
-          @if (isLoggedIn()) {
             <label class="caption-editor">
               <input
                 type="text"
@@ -87,15 +84,11 @@
                 <span>Save caption</span>
               }
             </button>
-          } @else {
-            <p class="photo-meta">{{ photo.caption || 'Photo #' + photo.id }}</p>
-          }
-        </article>
-      }
-    </section>
-  }
+          </article>
+        }
+      </section>
+    }
 
-  @if (isLoggedIn()) {
     <div class="admin-actions">
       <div class="upload-panel">
         <label class="new-caption-field">
@@ -128,8 +121,8 @@
 
       <button type="button" class="logout-button" (click)="logout()">Log Out</button>
     </div>
-  }
-</main>
+  </main>
+}
 
 @if (isLoggedIn() && draggedPhotoId() !== null) {
   <div

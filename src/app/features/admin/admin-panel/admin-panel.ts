@@ -98,14 +98,16 @@ export class AdminPanel {
   private dropCommitted = false;
 
   constructor() {
-    this.loadPhotos();
-    this.loadContent();
+    if (this.isLoggedIn()) {
+      this.loadPhotos();
+      this.loadContent();
+    }
   }
 
   login(): void {
     this.clearFeedback();
     this.loggingIn.set(true);
-  
+
     this.authService
       .login(this.loginData)
       .pipe(finalize(() => this.loggingIn.set(false)))
@@ -119,10 +121,10 @@ export class AdminPanel {
         error: () => this.loginError.set(true),
       });
   }
-  
 
   logout(): void {
     this.authService.logout();
+    this.photos.set([]);
     this.message.set('Logged out.');
     this.error.set(null);
     this.loginError.set(false);
@@ -135,7 +137,6 @@ export class AdminPanel {
   showBackNavigationLoading(): void {
     this.goingBackToMainPage.set(true);
   }
-  
 
   loadPhotos(): void {
     this.loading.set(true);
