@@ -38,7 +38,19 @@
     </section>
 
     @if (loading()) {
-      <p class="state">Loading photos...</p>
+      <section
+        class="admin-photo-grid skeleton-grid"
+        aria-label="Loading admin photos"
+        aria-busy="true"
+      >
+        @for (item of skeletonItems; track item) {
+          <article class="admin-photo-skeleton-card">
+            <span class="admin-photo-skeleton-frame" aria-hidden="true"></span>
+            <span class="admin-photo-skeleton-input" aria-hidden="true"></span>
+            <span class="admin-photo-skeleton-button" aria-hidden="true"></span>
+          </article>
+        }
+      </section>
     } @else if (photos().length === 0) {
       <p class="state">No photos yet.</p>
     } @else {
@@ -92,7 +104,7 @@
     <div class="admin-actions">
       <div class="upload-panel">
         <label class="new-caption-field">
-          <span>New photo caption</span>
+          <span>New photo caption for one photo upload</span>
           <input
             type="text"
             [(ngModel)]="newPhotoCaption"
@@ -113,6 +125,7 @@
           <input
             type="file"
             accept="image/*"
+            multiple
             [disabled]="uploadingPhoto()"
             (change)="onFileSelected($event)"
           />
@@ -124,12 +137,12 @@
   </main>
 }
 
-@if (isLoggedIn() && draggedPhotoId() !== null) {
+@if (isLoggedIn() && (draggedPhotoId() !== null || deletingPhotoId() !== null)) {
   <div
     class="trash-drop-zone"
     [class.is-hovered]="trashHover()"
     [class.is-deleting]="deletingPhotoId() !== null"
-    aria-label="Drop photo here to delete"
+    [attr.aria-label]="deletingPhotoId() !== null ? 'Deleting photo' : 'Drop photo here to delete'"
     (dragover)="onTrashDragOver($event)"
     (dragleave)="onTrashDragLeave()"
     (drop)="onTrashDrop($event)"
@@ -143,6 +156,9 @@
         <span></span>
         <span></span>
       </span>
+      @if (deletingPhotoId() !== null) {
+        <span class="trash-deleting-spinner" aria-hidden="true"></span>
+      }
     </div>
   </div>
 }

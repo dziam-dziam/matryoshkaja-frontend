@@ -13,4 +13,5 @@ export class PhotoListComponent {
   readonly photos = input.required<PhotoResponse[]>();
   readonly loading = input(false);
   readonly error = input<unknown>(null);
+  readonly skeletonItems = Array.from({ length: 8 }, (_, index) => index);
 }

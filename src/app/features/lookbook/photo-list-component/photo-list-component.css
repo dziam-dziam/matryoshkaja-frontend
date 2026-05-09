@@ -17,6 +17,36 @@
   animation-delay: 220ms;
 }
 
+.photo-skeleton-card {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.photo-skeleton-frame,
+.photo-skeleton-caption {
+  animation: skeletonShimmer 1300ms ease-in-out infinite;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(241 241 241 / 8%) 0%,
+      rgb(241 241 241 / 18%) 48%,
+      rgb(241 241 241 / 8%) 100%
+    ),
+    rgb(23 23 23 / 42%);
+  background-size: 220% 100%;
+}
+
+.photo-skeleton-frame {
+  height: 460px;
+  width: min(100%, 320px);
+}
+
+.photo-skeleton-caption {
+  height: 18px;
+  width: min(62%, 178px);
+}
+
 .state {
   color: var(--color-page-text);
   font-family: var(--font-display);
@@ -41,5 +71,21 @@
   .photo-grid {
     gap: 28px;
     grid-template-columns: repeat(2,minmax(0, 320px));
+  }
+
+  .photo-skeleton-frame {
+    aspect-ratio: 320 / 444.3;
+    height: auto;
+    width: 100%;
+  }
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
   }
 }

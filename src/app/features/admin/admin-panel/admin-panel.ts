@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { concatMap, finalize, from, toArray } from 'rxjs';
 
 import { AuthService } from '../../../core/api/auth.service';
 import { AuthTokenService } from '../../../core/api/auth-token.service';
@@ -50,6 +50,8 @@ export class AdminPanel {
   readonly savingContent = signal(false);
   readonly toastMessage = signal('');
   readonly toastType = signal<'success' | 'error'>('success');
+  readonly skeletonItems = Array.from({ length: 8 }, (_, index) => index);
+
 
   private captionSuccessTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private deleteSuccessTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -90,7 +92,7 @@ export class AdminPanel {
     password: '',
   };
 
-  selectedFile: File | null = null;
+  selectedFiles: File[] = [];
   newPhotoCaption = '';
 
   readonly draggedPhotoId = signal<number | null>(null);
@@ -188,40 +190,50 @@ export class AdminPanel {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.selectedFile = input.files?.[0] ?? null;
-
-    if (this.selectedFile) {
+    this.selectedFiles = Array.from(input.files ?? []);
+  
+    if (this.selectedFiles.length > 0) {
       this.uploadPhoto();
       input.value = '';
     }
   }
-
+  
   uploadPhoto(): void {
     this.clearFeedback();
-
-    if (!this.selectedFile) {
+  
+    if (this.selectedFiles.length === 0) {
       this.showToast('There was an error with adding photo', 'error');
       return;
     }
-
+  
     this.uploadingPhoto.set(true);
-
-    this.photoService
-      .upload(this.selectedFile, this.newPhotoCaption)
-      .pipe(finalize(() => this.uploadingPhoto.set(false)))
+  
+    const files = [...this.selectedFiles];
+    const caption = files.length === 1 ? this.newPhotoCaption : '';
+  
+    from(files)
+      .pipe(
+        concatMap((file) => this.photoService.upload(file, caption)),
+        toArray(),
+        finalize(() => this.uploadingPhoto.set(false)),
+      )
       .subscribe({
         next: () => {
-          this.selectedFile = null;
+          this.selectedFiles = [];
           this.newPhotoCaption = '';
-          this.message.set('Photo uploaded successfully.');
-          this.showToast('Photo has been added', 'success');
+          this.message.set(
+            files.length === 1 ? 'Photo uploaded successfully.' : `${files.length} photos uploaded successfully.`,
+          );
+          this.showToast(files.length === 1 ? 'Photo has been added' : 'Photos have been added', 'success');
           this.loadPhotos();
         },
         error: () => {
+          this.selectedFiles = [];
           this.showToast('There was an error with adding photo', 'error');
         },
       });
   }
+  
 
   updateCaption(photo: PhotoResponse): void {
     if (this.savingCaptionPhotoId() === photo.id) {

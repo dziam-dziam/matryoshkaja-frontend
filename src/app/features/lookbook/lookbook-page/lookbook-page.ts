@@ -6,6 +6,7 @@ import { HeaderComponent } from '../../../shared/components/header-component/hea
 import { PhotoListComponent } from '../photo-list-component/photo-list-component';
 import { PhotoResponse } from '../../../core/api/api.models';
 import { PhotoService } from '../../../core/api/photo.service';
+import { delay } from 'rxjs';
 
 @Component({
   selector: 'app-lookbook',

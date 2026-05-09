@@ -40,6 +40,43 @@
   width: min(100%, 320px);
 }
 
+.admin-photo-skeleton-card {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.admin-photo-skeleton-frame,
+.admin-photo-skeleton-input,
+.admin-photo-skeleton-button {
+  animation: adminSkeletonShimmer 1300ms ease-in-out infinite;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(241 241 241 / 7%) 0%,
+      rgb(241 241 241 / 17%) 48%,
+      rgb(241 241 241 / 7%) 100%
+    ),
+    rgb(23 23 23 / 46%);
+  background-size: 220% 100%;
+}
+
+.admin-photo-skeleton-frame {
+  height: 444.3px;
+  width: min(100%, 320px);
+}
+
+.admin-photo-skeleton-input {
+  height: 42px;
+  width: min(100%, 320px);
+}
+
+.admin-photo-skeleton-button {
+  height: 32px;
+  width: 126px;
+}
+
+
 .photo-meta {
   color: var(--color-text);
   font-family: var(--font-display);
@@ -78,7 +115,7 @@
   border: 2px solid var(--color-text);
   color: var(--color-text);
   display: inline-flex;
-  gap: 10px;
+  gap: 2px;
   font-family: var(--font-display);
   font-size: 22px;
   font-weight: 700;
@@ -113,7 +150,15 @@
 }
 
 .add-arrow {
-  margin-left: 10px;
+  display: inline-block;
+  margin-left: 4px;
+  transform: translateX(0);
+  transition: transform 220ms ease;
+}
+
+.add-button:hover .add-arrow,
+.add-button:focus-within .add-arrow {
+  transform: translateX(4px);
 }
 
 .add-button input {
@@ -293,6 +338,13 @@
     max-height: 444.3px;
     width: 100%;
   }
+
+  .admin-photo-skeleton-frame {
+    aspect-ratio: 320 / 444.3;
+    height: auto;
+    width: 100%;
+  }
+  
 
   .caption-editor {
     width: min(100%, 200px);
@@ -557,14 +609,19 @@
   width: 190px;
 }
 
+
 .trash-icon {
   height: 82px;
   position: relative;
   transform: translateY(8px);
-  transition: transform 180ms ease;
+  transition:
+    filter 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
   width: 72px;
   z-index: 1;
 }
+
 
 .trash-handle,
 .trash-lid,
@@ -615,6 +672,22 @@
   width: 5px;
 }
 
+.trash-deleting-spinner {
+  animation: spinnerTurn 760ms linear infinite;
+  background: var(--color-header);
+  border: 3px solid var(--color-text);
+  border-right-color: transparent;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 6px rgb(23 23 23 / 72%),
+    0 0 26px rgb(241 241 241 / 22%);
+  height: 28px;
+  left: 24px;
+  position: absolute;
+  top: 44px;
+  width: 28px;
+}
+
 .trash-drop-zone.is-hovered .trash-icon {
   transform: translateY(0) scale(1.06);
 }
@@ -623,6 +696,18 @@
 .trash-drop-zone.is-hovered .trash-handle {
   transform: translate(-5px, -12px) rotate(-12deg);
 }
+
+.trash-drop-zone.is-deleting .trash-icon {
+  filter: saturate(0.85);
+  opacity: 0.92;
+  transform: translateY(0) scale(1.04);
+}
+
+.trash-drop-zone.is-deleting .trash-lid,
+.trash-drop-zone.is-deleting .trash-handle {
+  transform: translate(-5px, -12px) rotate(-12deg);
+}
+
 
 
 .delete-success-toast {
@@ -710,6 +795,17 @@
     transform: translate(-50%, -58%);
   }
 }
+
+@keyframes adminSkeletonShimmer {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
+}
+
 
 @media (max-width: 720px) {
   .content-editor {

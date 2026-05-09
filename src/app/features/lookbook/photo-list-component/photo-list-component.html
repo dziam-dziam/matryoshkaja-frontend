@@ -1,5 +1,12 @@
 @if (loading()) {
-  <p class="state">Loading photos...</p>
+  <section class="photo-grid skeleton-grid" aria-label="Loading lookbook photos" aria-busy="true">
+    @for (item of skeletonItems; track item) {
+      <article class="photo-skeleton-card">
+        <span class="photo-skeleton-frame" aria-hidden="true"></span>
+        <span class="photo-skeleton-caption" aria-hidden="true"></span>
+      </article>
+    }
+  </section>
 } @else if (error()) {
   <p class="state error">Could not load photos.</p>
 } @else if (photos().length === 0) {
