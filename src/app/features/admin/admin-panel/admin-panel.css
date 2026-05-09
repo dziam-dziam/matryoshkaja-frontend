@@ -314,43 +314,6 @@
   transform: translateY(-1px);
 }
 
-
-@media (max-width: 1040px) {
-  .admin-photo-grid {
-    gap: 30px 42px;
-    grid-template-columns: repeat(2, minmax(240px, 452.4px));
-  }
-}
-
-@media (max-width: 640px) {
-  .admin-lookbook {
-    gap: 28px;
-    padding: 24px 18px 44px;
-  }
-
-  .admin-photo-grid {
-    gap: 28px;
-    grid-template-columns: repeat(2, minmax(0, 320px));
-  }
-
-  .photo-frame img {
-    height: auto;
-    max-height: 444.3px;
-    width: 100%;
-  }
-
-  .admin-photo-skeleton-frame {
-    aspect-ratio: 320 / 444.3;
-    height: auto;
-    width: 100%;
-  }
-  
-
-  .caption-editor {
-    width: min(100%, 200px);
-  }
-}
-
 .content-editor {
   background:
     linear-gradient(145deg, rgb(255 255 255 / 7%), rgb(255 255 255 / 0%)),
@@ -649,7 +612,7 @@
   position: absolute;
   top: 20px;
   transition: transform 180ms ease;
-  width: 80px;
+  width: 71px;
 }
 
 
@@ -806,6 +769,12 @@
   }
 }
 
+@media (max-width: 1040px) {
+  .admin-photo-grid {
+    gap: 30px 42px;
+    grid-template-columns: repeat(2, minmax(240px, 452.4px));
+  }
+}
 
 @media (max-width: 720px) {
   .content-editor {
@@ -838,6 +807,35 @@
   }
 }
 
+@media (max-width: 640px) {
+  .admin-lookbook {
+    gap: 28px;
+    padding: 24px 18px 44px;
+  }
+
+  .admin-photo-grid {
+    gap: 28px;
+    grid-template-columns: repeat(2, minmax(0, 320px));
+  }
+
+  .photo-frame img {
+    height: auto;
+    max-height: 444.3px;
+    width: 100%;
+  }
+
+  .admin-photo-skeleton-frame {
+    aspect-ratio: 320 / 444.3;
+    height: auto;
+    width: 100%;
+  }
+  
+
+  .caption-editor {
+    width: min(100%, 200px);
+  }
+}
+
 @media (max-width: 420px) {
   .content-editor {
     border-left: 0;
@@ -858,5 +856,67 @@
   .content-fields textarea {
     min-height: 128px;
     padding: 10px;
+  }
+}
+.admin-lookbook {
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+.admin-photo-grid {
+  grid-template-columns: repeat(4, minmax(0, 320px));
+  min-width: 0;
+  width: 100%;
+}
+
+.admin-photo-card,
+.photo-frame,
+.caption-editor,
+.content-editor,
+.content-fields,
+.content-fields label,
+.admin-actions,
+.upload-panel,
+.new-caption-field {
+  min-width: 0;
+}
+
+.photo-frame,
+.admin-actions,
+.upload-panel {
+  width: 100%;
+}
+
+.admin-actions {
+  max-width: 420px;
+}
+
+.add-button {
+  min-width: 0;
+  padding: 0 42px;
+  width: min(100%, 392px);
+}
+
+@media (max-width: 1040px) {
+  .admin-photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 320px));
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .caption-editor {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .add-button {
+    font-size: 20px;
+    padding-inline: 24px;
   }
 }

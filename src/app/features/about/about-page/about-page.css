@@ -86,3 +86,8 @@
     width: min(100%, 320.3px);
   }
 }
+@media (max-width: 420px) {
+  .about-image{
+    width: min(100%, 240px);
+  }
+}
