@@ -5,8 +5,13 @@ import { AuthTokenService } from './auth-token.service';
 
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const token = inject(AuthTokenService).token();
+  const publicReadRequest =
+    request.method === 'GET' &&
+    (request.url.endsWith('/photos') ||
+      /\/photos\/\d+$/.test(request.url) ||
+      request.url.endsWith('/page-content'));
 
-  if (!token) {
+  if (!token || publicReadRequest) {
     return next(request);
   }
 
