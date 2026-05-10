@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { concatMap, finalize, from, toArray } from 'rxjs';
 
@@ -51,6 +51,9 @@ export class AdminPanel {
   readonly toastMessage = signal('');
   readonly toastType = signal<'success' | 'error'>('success');
   readonly skeletonItems = Array.from({ length: 8 }, (_, index) => index);
+  private autoScrollFrameId: number | null = null;
+  private autoScrollSpeed = 0;
+
 
 
   private captionSuccessTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -276,20 +279,20 @@ export class AdminPanel {
     this.dropCommitted = false;
     this.trashHover.set(false);
 
+    this.setAdminDragCursor(true);
+
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', String(photoId));
-
-      const card = event.currentTarget as HTMLElement | null;
-
-      if (card) {
-        event.dataTransfer.setDragImage(card, card.offsetWidth / 2, 40);
-      }
+      event.dataTransfer.dropEffect = 'move';
+      event.dataTransfer.setDragImage(this.createTransparentDragImage(), 0, 0);
     }
+
   }
 
   onDragOver(targetPhotoId: number, event: DragEvent): void {
     event.preventDefault();
+    this.updateDragAutoScroll(event.clientY);
 
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'move';
@@ -308,11 +311,14 @@ export class AdminPanel {
     this.dropCommitted = true;
     this.draggedPhotoId.set(null);
     this.dragStartPhotos = [];
+    this.stopDragAutoScroll();
+    this.setAdminDragCursor(false);
     this.savePhotoOrder();
   }
 
   onTrashDragOver(event: DragEvent): void {
     event.preventDefault();
+    this.updateDragAutoScroll(event.clientY);
     this.trashHover.set(true);
 
     if (event.dataTransfer) {
@@ -336,6 +342,8 @@ export class AdminPanel {
     this.dropCommitted = true;
     this.draggedPhotoId.set(null);
     this.trashHover.set(false);
+    this.stopDragAutoScroll();
+    this.setAdminDragCursor(false);
     this.deletePhotoFromTrash(photoId);
   }
 
@@ -348,10 +356,35 @@ export class AdminPanel {
     this.dragStartPhotos = [];
     this.dropCommitted = false;
     this.trashHover.set(false);
+    this.setAdminDragCursor(false);
+    this.stopDragAutoScroll();
   }
 
   isDragging(photoId: number): boolean {
     return this.draggedPhotoId() === photoId;
+  }
+
+  @HostListener('document:dragover', ['$event'])
+  onDocumentDragOver(event: DragEvent): void {
+    if (this.draggedPhotoId() !== null) {
+      event.preventDefault();
+      this.updateDragAutoScroll(event.clientY);
+
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'move';
+      }
+    }
+  }
+
+  @HostListener('document:dragenter', ['$event'])
+  onDocumentDragEnter(event: DragEvent): void {
+    if (this.draggedPhotoId() !== null) {
+      event.preventDefault();
+
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'move';
+      }
+    }
   }
 
   private previewPhotoOrder(targetPhotoId: number): void {
@@ -428,6 +461,80 @@ export class AdminPanel {
 
     this.photos.set(photos);
   }
+
+  private updateDragAutoScroll(pointerY: number): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+  
+    const viewportHeight = window.innerHeight;
+    const edgeSize = Math.min(130, Math.max(90, viewportHeight * 0.22));
+    const maxSpeed = 28;
+    let nextSpeed = 0;
+  
+    if (pointerY < edgeSize) {
+      const intensity = (edgeSize - pointerY) / edgeSize;
+      nextSpeed = -Math.max(6, intensity * maxSpeed);
+    } else if (pointerY > viewportHeight - edgeSize) {
+      const intensity = (pointerY - (viewportHeight - edgeSize)) / edgeSize;
+      nextSpeed = Math.max(6, intensity * maxSpeed);
+    }
+  
+    this.autoScrollSpeed = nextSpeed;
+  
+    if (nextSpeed === 0) {
+      this.stopDragAutoScroll();
+      return;
+    }
+  
+    this.startDragAutoScroll();
+  }
+  
+  private startDragAutoScroll(): void {
+    if (typeof window === 'undefined' || this.autoScrollFrameId !== null) {
+      return;
+    }
+  
+    this.autoScrollFrameId = window.requestAnimationFrame(() => {
+      this.autoScrollFrameId = null;
+  
+      if (this.draggedPhotoId() === null || this.autoScrollSpeed === 0) {
+        this.stopDragAutoScroll();
+        return;
+      }
+  
+      window.scrollBy({ top: this.autoScrollSpeed, behavior: 'auto' });
+      this.startDragAutoScroll();
+    });
+  }
+  
+  private stopDragAutoScroll(): void {
+    if (typeof window !== 'undefined' && this.autoScrollFrameId !== null) {
+      window.cancelAnimationFrame(this.autoScrollFrameId);
+    }
+  
+    this.autoScrollFrameId = null;
+    this.autoScrollSpeed = 0;
+  }
+
+  private setAdminDragCursor(isDragging: boolean): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+  
+    document.documentElement.classList.toggle('is-admin-photo-dragging', isDragging);
+    document.body.classList.toggle('is-admin-photo-dragging', isDragging);
+  }
+  
+  
+  private createTransparentDragImage(): HTMLImageElement {
+    const image = new Image();
+    image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+  
+    return image;
+  }
+  
+  
 
   private showCaptionSuccess(photo: PhotoResponse): void {
     if (this.captionSuccessTimeoutId) {

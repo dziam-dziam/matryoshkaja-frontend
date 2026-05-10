@@ -920,3 +920,6 @@
     padding-inline: 24px;
   }
 }
+.admin-photo-card.is-dragging{
+  cursor: grabbing !important;
+}

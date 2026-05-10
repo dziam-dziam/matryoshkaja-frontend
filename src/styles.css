@@ -99,4 +99,11 @@ body {
 *::after {
   box-sizing: border-box;
 }
+html.is-admin-photo-dragging,
+html.is-admin-photo-dragging *,
+body.is-admin-photo-dragging,
+body.is-admin-photo-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
 
