@@ -51,6 +51,7 @@ export class AdminPanel {
   readonly toastMessage = signal('');
   readonly toastType = signal<'success' | 'error'>('success');
   readonly skeletonItems = Array.from({ length: 8 }, (_, index) => index);
+  readonly savingPhotoOrder = signal(false);
   private autoScrollFrameId: number | null = null;
   private autoScrollSpeed = 0;
 
@@ -364,6 +365,47 @@ export class AdminPanel {
     return this.draggedPhotoId() === photoId;
   }
 
+  canMovePhoto(photoId: number, direction: -1 | 1): boolean {
+    const photoIndex = this.photos().findIndex((photo) => photo.id === photoId);
+  
+    if (photoIndex === -1) {
+      return false;
+    }
+  
+    const nextIndex = photoIndex + direction;
+  
+    return nextIndex >= 0 && nextIndex < this.photos().length;
+  }
+  
+  movePhoto(photoId: number, direction: -1 | 1): void {
+    if (this.savingPhotoOrder() || this.deletingPhotoId() !== null) {
+      return;
+    }
+  
+    const currentPhotos = this.photos();
+    const photoIndex = currentPhotos.findIndex((photo) => photo.id === photoId);
+    const nextIndex = photoIndex + direction;
+  
+    if (photoIndex === -1 || nextIndex < 0 || nextIndex >= currentPhotos.length) {
+      return;
+    }
+  
+    const nextPhotos = [...currentPhotos];
+    [nextPhotos[photoIndex], nextPhotos[nextIndex]] = [nextPhotos[nextIndex], nextPhotos[photoIndex]];
+  
+    this.setPhotosWithMotion(nextPhotos.map((photo, index) => ({ ...photo, displayOrder: index + 1 })));
+    this.savePhotoOrder(currentPhotos);
+  }
+  
+  deletePhotoFromMobile(photoId: number): void {
+    if (this.deletingPhotoId() !== null) {
+      return;
+    }
+  
+    this.deletePhotoFromTrash(photoId);
+  }
+  
+
   @HostListener('document:dragover', ['$event'])
   onDocumentDragOver(event: DragEvent): void {
     if (this.draggedPhotoId() !== null) {
@@ -408,17 +450,28 @@ export class AdminPanel {
     this.setPhotosWithMotion(photos.map((photo, index) => ({ ...photo, displayOrder: index + 1 })));
   }
 
-  private savePhotoOrder(): void {
+  private savePhotoOrder(previousPhotos?: PhotoResponse[]): void {
     this.clearFeedback();
-
-    this.photoService.updateOrder({ photoIds: this.photos().map((photo) => photo.id) }).subscribe({
-      next: (photos) => {
-        this.photos.set(photos);
-        this.message.set('Photo order saved.');
-      },
-      error: (error) => this.error.set(error),
-    });
+    this.savingPhotoOrder.set(true);
+  
+    this.photoService
+      .updateOrder({ photoIds: this.photos().map((photo) => photo.id) })
+      .pipe(finalize(() => this.savingPhotoOrder.set(false)))
+      .subscribe({
+        next: (photos) => {
+          this.photos.set(photos);
+          this.message.set('Photo order saved.');
+        },
+        error: (error) => {
+          this.error.set(error);
+  
+          if (previousPhotos) {
+            this.setPhotosWithMotion(previousPhotos);
+          }
+        },
+      });
   }
+  
 
   private deletePhotoFromTrash(photoId: number): void {
     this.clearFeedback();

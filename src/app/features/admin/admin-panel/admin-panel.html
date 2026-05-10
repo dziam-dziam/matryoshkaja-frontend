@@ -96,6 +96,43 @@
                 <span>Save caption</span>
               }
             </button>
+            <div class="mobile-photo-actions" aria-label="Photo order and delete controls">
+              <button
+                type="button"
+                class="mobile-photo-action"
+                [disabled]="
+                  !canMovePhoto(photo.id, -1) || savingPhotoOrder() || deletingPhotoId() !== null
+                "
+                (click)="movePhoto(photo.id, -1)"
+              >
+                Move up
+              </button>
+
+              <button
+                type="button"
+                class="mobile-photo-action"
+                [disabled]="
+                  !canMovePhoto(photo.id, 1) || savingPhotoOrder() || deletingPhotoId() !== null
+                "
+                (click)="movePhoto(photo.id, 1)"
+              >
+                Move down
+              </button>
+
+              <button
+                type="button"
+                class="mobile-photo-action is-delete"
+                [disabled]="deletingPhotoId() !== null"
+                (click)="deletePhotoFromMobile(photo.id)"
+              >
+                @if (deletingPhotoId() === photo.id) {
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span>Deleting...</span>
+                } @else {
+                  <span>Delete</span>
+                }
+              </button>
+            </div>
           </article>
         }
       </section>
