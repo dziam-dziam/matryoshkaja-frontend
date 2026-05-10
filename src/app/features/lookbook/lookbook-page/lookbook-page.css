@@ -1,5 +1,5 @@
 .lookbook-body {
-  animation: pageFadeIn 700ms 120ms ease-out both;
+  animation: pageFadeIn 700ms 120ms ease-out backwards;
   background: var(--color-body);
   display: grid;
   gap: 38px;

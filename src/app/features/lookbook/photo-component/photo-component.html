@@ -1,8 +1,14 @@
 <article class="photo-card">
-  <img [src]="photo().imageUrl" [alt]="'Matryoshkaja photo ' + photo().id" />
+  <button
+    type="button"
+    class="photo-open-button"
+    [attr.aria-label]="'Open ' + (photo().caption || 'photo #' + photo().id)"
+    (click)="selectPhoto()"
+  >
+    <img [src]="photo().imageUrl" [alt]="'Matryoshkaja photo ' + photo().id" />
+  </button>
 
   <p class="photo-meta">
-    <!-- CAPTION CHANGE: show custom caption, fallback keeps old look for photos without caption. -->
     <span>{{ photo().caption || 'Photo #' + photo().id }}</span>
   </p>
 </article>

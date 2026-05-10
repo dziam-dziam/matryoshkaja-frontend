@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 import { PhotoResponse } from '../../../core/api/api.models';
 
@@ -10,4 +10,9 @@ import { PhotoResponse } from '../../../core/api/api.models';
 })
 export class PhotoComponent {
   readonly photo = input.required<PhotoResponse>();
+  readonly photoSelected = output<PhotoResponse>();
+
+  selectPhoto(): void {
+    this.photoSelected.emit(this.photo());
+  }
 }

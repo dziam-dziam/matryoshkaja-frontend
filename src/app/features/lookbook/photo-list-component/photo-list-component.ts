@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, HostListener, input, signal } from '@angular/core';
 
 import { PhotoResponse } from '../../../core/api/api.models';
 import { PhotoComponent } from '../photo-component/photo-component';
@@ -14,4 +14,22 @@ export class PhotoListComponent {
   readonly loading = input(false);
   readonly error = input<unknown>(null);
   readonly skeletonItems = Array.from({ length: 8 }, (_, index) => index);
+  readonly selectedPhoto = signal<PhotoResponse | null>(null);
+
+  openPhoto(photo: PhotoResponse): void {
+    this.selectedPhoto.set(photo);
+  }
+
+  closePhoto(): void {
+    this.selectedPhoto.set(null);
+  }
+
+  getPhotoLabel(photo: PhotoResponse): string {
+    return photo.caption || `Photo #${photo.id}`;
+  }
+
+  @HostListener('document:keydown.escape')
+  closeOnEscape(): void {
+    this.closePhoto();
+  }
 }

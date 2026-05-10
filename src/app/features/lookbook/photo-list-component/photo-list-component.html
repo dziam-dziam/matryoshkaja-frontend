@@ -14,7 +14,32 @@
 } @else {
   <section class="photo-grid" aria-label="Lookbook photos">
     @for (photo of photos(); track photo.id) {
-      <app-photo-component [photo]="photo" />
+      <app-photo-component [photo]="photo" (photoSelected)="openPhoto($event)" />
     }
   </section>
+}
+@if (selectedPhoto(); as photo) {
+  <div class="photo-detail-backdrop" (click)="closePhoto()">
+    <section
+      class="photo-detail"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="getPhotoLabel(photo)"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        type="button"
+        class="photo-detail-close"
+        aria-label="Close photo detail"
+        (click)="closePhoto()"
+      >
+        &times;
+      </button>
+
+      <figure>
+        <img [src]="photo.imageUrl" [alt]="'Matryoshkaja photo ' + photo.id" />
+        <figcaption>{{ getPhotoLabel(photo) }}</figcaption>
+      </figure>
+    </section>
+  </div>
 }
