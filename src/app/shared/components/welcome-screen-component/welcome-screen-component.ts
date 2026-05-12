@@ -21,30 +21,37 @@ export class WelcomeScreenComponent implements OnInit, OnDestroy {
     if (!this.isBrowser) {
       return;
     }
-
+  
     const alreadySeen = sessionStorage.getItem(WELCOME_SESSION_KEY) === 'true';
-
+  
     if (alreadySeen) {
+      document.body.classList.remove('is-welcome-active');
       return;
     }
-
+  
+    document.body.classList.add('is-welcome-active');
     this.visible.set(true);
-
+  
     this.timers.push(
       setTimeout(() => {
         this.finishing.set(true);
-      }, 2800),
+        document.body.classList.remove('is-welcome-active');
+      }, 2600),
     );
-
+  
     this.timers.push(
       setTimeout(() => {
         sessionStorage.setItem(WELCOME_SESSION_KEY, 'true');
         this.visible.set(false);
-      }, 4200),
+      }, 3600),
     );
   }
-
+  
   ngOnDestroy(): void {
     this.timers.forEach((timer) => clearTimeout(timer));
-  }
+  
+    if (this.isBrowser) {
+      document.body.classList.remove('is-welcome-active');
+    }
+  }  
 }

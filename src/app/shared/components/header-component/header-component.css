@@ -1,47 +1,33 @@
 .site-header {
   animation: headerDriftIn 700ms ease-out both;
-  background: var(--color-header);
-  color: var(--color-text);
-  display: grid;
-  min-height: 350px;
-  padding: 1px 15px 12px;
+  background-image: url('/assets/lace-bg.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #171717;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
   position: relative;
+  width: 100vw;
 }
 
 .nav-row {
-  align-items: center;
+  left: 24px;
+  position: absolute;
+  top: 24px;
+  z-index: 2; 
+}
+
+nav {
   display: flex;
-  gap: 22px;
-  position: relative;
-  z-index: 2;
+  align-items: center;
+  gap: 30px;
 }
 
-.brand-frame {
-  border: 3px solid var(--color-text);
-  color: var(--color-text);
-  font-family: var(--font-brand);
-  font-size: 25.8px;
-  font-weight: 700;
-  line-height: 1;
-  padding: 8px 13px;
-  text-decoration: none;
-  transition:
-    background-color 220ms ease,
-    border-color 220ms ease,
-    color 220ms ease,
-    transform 220ms ease;
-}
-
-.brand-frame:hover,
-.brand-frame:focus-visible {
-  background: var(--color-text);
-  border-color: var(--color-text);
-  color: var(--color-header);
-  transform: translateY(-1px);
-}
 
 nav a {
-  color: var(--color-text);
+  color: #171717;
   font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 700;
@@ -51,7 +37,7 @@ nav a {
 }
 
 nav a::after {
-  background: var(--color-muted);
+  background: #171717;
   bottom: -5px;
   content: '';
   height: 1px;
@@ -65,7 +51,7 @@ nav a::after {
 
 nav a:hover,
 nav a:focus-visible {
-  color: var(--color-muted);
+  color: #000;
 }
 
 nav a:hover::after,
@@ -73,33 +59,61 @@ nav a:focus-visible::after {
   transform: scaleX(1);
 }
 
+.nav-row {
+  animation: headerElementReveal 700ms 3100ms ease-out both;
+  left: 24px;
+  position: absolute;
+  top: 24px;
+  z-index: 2;
+}
+
+.artist-name {
+  animation: headerElementReveal 900ms 3200ms ease-out both;
+  font-family: var(--font-display);
+  font-size: clamp(54px, 8vw, 118px);
+  font-weight: 400;
+  line-height: 0.95;
+  margin: 0;
+  text-align: center;
+}
+
+.artist-location {
+  animation: headerElementReveal 700ms 3400ms ease-out both;
+  bottom: 28px;
+  font-family: var(--font-sans);
+  font-size: 20px;
+  font-weight: 700;
+  left: 24px;
+  line-height: 1;
+  margin: 0;
+  position: absolute;
+}
+
+@keyframes headerElementReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 .hero-row {
-  align-self: end;
-  display: block;
-  position: relative;
+  display: grid;
+  inset: 0;
+  place-items: center;
+  pointer-events: none;
+  position: absolute;
   z-index: 1;
 }
 
 .artist-block {
-  padding-left: 6px;
-}
-
-.artist-name {
-  animation: softReveal 760ms 120ms ease-out both;
-  font-family: var(--font-display);
-  font-size: 42.4px;
-  font-weight: 400;
-  line-height: 1;
-  margin: 0 0 22px;
-}
-
-.artist-location {
-  animation: softReveal 760ms 220ms ease-out both;
-  font-family: var(--font-brand);
-  font-size: 19px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  margin: 0;
+  display: grid;
+  justify-items: center;
 }
 
 .section-title {
@@ -131,20 +145,12 @@ nav a:focus-visible::after {
 }
 
 @media (max-width: 700px) {
-  .site-header {
-    min-height: 300px;
-  }
-
-  .brand-frame {
-    font-size: 21px;
-  }
-
   .nav-row {
     gap: 16px;
   }
 
   .artist-name {
-    font-size: 36px;
+    font-size: clamp(44px, 14vw, 74px);
   }
 
   .section-title {

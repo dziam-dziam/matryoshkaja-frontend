@@ -2,7 +2,7 @@
 
 :root {
   --color-header: #171717;
-  --color-body: #465150;
+  --color-body: #000000;
   --color-text: #f1f1f1;
   --color-muted: #c6bebe;
 
@@ -105,5 +105,15 @@ body.is-admin-photo-dragging,
 body.is-admin-photo-dragging * {
   cursor: grabbing !important;
   user-select: none !important;
+}
+body.is-welcome-active .site-header {
+  background-image: none;
+  background-color: #fff;
+}
+
+body.is-welcome-active .nav-row,
+body.is-welcome-active .artist-name,
+body.is-welcome-active .artist-location {
+  opacity: 0;
 }
 
